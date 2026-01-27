@@ -1178,7 +1178,7 @@
     <!-- Bootstrap JS -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"></script>
     
-   <script>
+  <script>
     // Game state
     const gameState = {
         code: null,
@@ -1201,8 +1201,8 @@
     let isHost = false;
     let gamePollInterval = null;
     
-    // Use URL parameters for cross-device sharing
-    const urlGameState = {};
+    // GitHub Pages compatible multiplayer solution
+    const LOCAL_STORAGE_KEY = 'rajaRaniGameData';
 
     // Role definitions
     const roleDefinitions = [
@@ -1270,28 +1270,6 @@
         const urlParams = new URLSearchParams(window.location.search);
         const gameCodeFromURL = urlParams.get('code');
         const playerNameFromURL = urlParams.get('name');
-        const gameStateFromURL = urlParams.get('state');
-        
-        if (gameCodeFromURL && gameStateFromURL) {
-            // Try to decode game state from URL
-            try {
-                const decodedState = decodeURIComponent(atob(gameStateFromURL));
-                const parsedState = JSON.parse(decodedState);
-                
-                if (parsedState && parsedState.code === gameCodeFromURL) {
-                    // Load game from URL
-                    Object.assign(gameState, parsedState);
-                    currentPlayerId = localStorage.getItem('rajaRaniPlayerId') || 'player_' + Date.now();
-                    isHost = false;
-                    
-                    showGamePage();
-                    startGamePolling();
-                    return;
-                }
-            } catch (e) {
-                console.log('Could not load game from URL');
-            }
-        }
         
         if (gameCodeFromURL) {
             // Auto-join if URL has game code
@@ -1318,27 +1296,24 @@
         
         if (savedCode && savedPlayerId) {
             // Try to load game
-            loadGameFromServer(savedCode).then(gameData => {
-                if (gameData && gameData.code === savedCode) {
-                    gameState.code = savedCode;
-                    Object.assign(gameState, gameData);
-                    currentPlayerId = savedPlayerId;
-                    isHost = localStorage.getItem('rajaRaniIsHost') === 'true';
-                    
-                    // Check if player exists
-                    const playerExists = gameState.players.some(p => p.id === currentPlayerId);
-                    if (playerExists) {
-                        startGamePolling();
-                        showGamePage();
-                    } else {
-                        showHomePage();
-                    }
+            const gameData = loadGameFromStorage(savedCode);
+            if (gameData && gameData.code === savedCode) {
+                gameState.code = savedCode;
+                Object.assign(gameState, gameData);
+                currentPlayerId = savedPlayerId;
+                isHost = localStorage.getItem('rajaRaniIsHost') === 'true';
+                
+                // Check if player exists
+                const playerExists = gameState.players.some(p => p.id === currentPlayerId);
+                if (playerExists) {
+                    startGamePolling();
+                    showGamePage();
                 } else {
                     showHomePage();
                 }
-            }).catch(() => {
+            } else {
                 showHomePage();
-            });
+            }
         } else {
             showHomePage();
         }
@@ -1418,25 +1393,56 @@
         localStorage.setItem('rajaRaniPlayerName', 'Host');
         localStorage.setItem('rajaRaniIsHost', 'true');
         
-        // Generate shareable URL with encoded state
-        const shareUrl = generateShareableURL();
+        // Save game to shared storage
+        saveGameToStorage(gameState);
         
         try {
-            // Save to localStorage (host only)
-            saveGameToLocalStorage(gameState);
-            
             // Update UI
             updateUI();
             showGamePage();
             
             createConfetti();
             
-            // Show share instructions
-            alert(`🎮 New game created!\n\nGame Code: ${gameState.code}\n\n🔗 Share this URL with players:\n${shareUrl}\n\n📱 Players can:\n1. Open this URL on their device\n2. Enter their name\n3. Click "Join Game"`);
+            // Create shareable link
+            const shareLink = `${window.location.origin}${window.location.pathname}?code=${gameState.code}`;
+            const shareText = `🎮 Join my Raja Rani game!\n\nGame Code: ${gameState.code}\n\nJoin URL: ${shareLink}\n\nOr enter code manually in the game.`;
+            
+            // Show instructions for cross-device play
+            const instructions = `
+                🎮 NEW GAME CREATED! 🎮
+                
+                Game Code: ${gameState.code}
+                
+                📱 FOR CROSS-DEVICE PLAY:
+                
+                Method 1: Share URL
+                ---------------
+                1. Share this URL with friends:
+                   ${shareLink}
+                2. They open the link on their device
+                3. They click "Join Existing Game"
+                4. They enter the game code: ${gameState.code}
+                
+                Method 2: Manual Join
+                ---------------
+                1. Friends go to: ${window.location.origin}
+                2. They click "Join Existing Game"
+                3. They enter: 
+                   - Game Code: ${gameState.code}
+                   - Their Name
+                4. They click JOIN GAME
+                
+                ⚠️ IMPORTANT: 
+                • All players must use the SAME Wi-Fi/Network
+                • Host needs to frequently click "SYNC GAME"
+                • Players should refresh page to see updates
+            `;
+            
+            alert(instructions);
             
             // Copy to clipboard if possible
             if (navigator.clipboard) {
-                navigator.clipboard.writeText(`🎮 Join my Raja Rani game!\n\nGame Code: ${gameState.code}\n\nJoin URL: ${shareUrl}`).then(() => {
+                navigator.clipboard.writeText(shareText).then(() => {
                     console.log('Game info copied to clipboard');
                 });
             }
@@ -1447,59 +1453,53 @@
         }
     }
 
-    // Generate shareable URL with encoded game state
-    function generateShareableURL() {
-        // Create a minimal game state for sharing
-        const shareState = {
-            code: gameState.code,
-            players: gameState.players.map(p => ({
-                id: p.id,
-                name: p.name,
-                points: p.points,
-                role: p.role,
-                isHost: p.isHost
-            })),
-            gamePhase: gameState.gamePhase,
-            round: gameState.round,
-            lastUpdated: Date.now()
-        };
-        
-        // Encode state for URL
-        const encodedState = btoa(JSON.stringify(shareState));
-        const baseUrl = window.location.origin + window.location.pathname;
-        
-        return `${baseUrl}?code=${gameState.code}&state=${encodeURIComponent(encodedState)}`;
-    }
-
-    // Save game to localStorage
-    function saveGameToLocalStorage(gameData) {
-        const allGames = JSON.parse(localStorage.getItem('rajaRaniAllGames') || '{}');
-        allGames[gameData.code] = {
-            ...gameData,
-            lastUpdated: Date.now()
-        };
-        localStorage.setItem('rajaRaniAllGames', JSON.stringify(allGames));
-        
-        // Also update URL for sharing
-        if (isHost) {
-            const shareUrl = generateShareableURL();
-            window.history.replaceState({}, '', shareUrl);
-        }
-        
-        return true;
-    }
-
-    // Load game from localStorage
-    function loadGameFromLocalStorage(gameCode) {
+    // Save game to storage
+    function saveGameToStorage(gameData) {
         try {
+            // For GitHub Pages, we use localStorage with timestamp
+            const gameKey = `rajaRaniGame_${gameData.code}`;
+            const gameToSave = {
+                ...gameData,
+                _savedAt: Date.now(),
+                _isPublic: true
+            };
+            
+            // Save to localStorage
+            localStorage.setItem(gameKey, JSON.stringify(gameToSave));
+            
+            // Also save to a shared games list
             const allGames = JSON.parse(localStorage.getItem('rajaRaniAllGames') || '{}');
-            const gameData = allGames[gameCode];
+            allGames[gameData.code] = {
+                code: gameData.code,
+                players: gameData.players.map(p => ({ 
+                    name: p.name, 
+                    points: p.points,
+                    isHost: p.isHost
+                })),
+                gamePhase: gameData.gamePhase,
+                round: gameData.round,
+                lastUpdated: Date.now()
+            };
+            localStorage.setItem('rajaRaniAllGames', JSON.stringify(allGames));
+            
+            return true;
+        } catch (error) {
+            console.error('Error saving game:', error);
+            return false;
+        }
+    }
+
+    // Load game from storage
+    function loadGameFromStorage(gameCode) {
+        try {
+            // Try to load from specific game key
+            const gameKey = `rajaRaniGame_${gameCode}`;
+            const gameData = JSON.parse(localStorage.getItem(gameKey));
             
             if (gameData) {
                 // Check if game is expired (older than 2 hours)
-                if (gameData.lastUpdated && Date.now() - gameData.lastUpdated > 7200000) {
-                    delete allGames[gameCode];
-                    localStorage.setItem('rajaRaniAllGames', JSON.stringify(allGames));
+                if (gameData._savedAt && Date.now() - gameData._savedAt > 7200000) {
+                    localStorage.removeItem(gameKey);
                     return null;
                 }
                 
@@ -1521,6 +1521,32 @@
         }
     }
 
+    // Sync game manually (for host)
+    function syncGame() {
+        if (isHost) {
+            saveGameToStorage(gameState);
+            alert('✅ Game synced! Players should refresh their page to see updates.');
+        } else {
+            // For players, refresh the game state
+            if (gameState.code) {
+                const loadedGame = loadGameFromStorage(gameState.code);
+                if (loadedGame) {
+                    // Keep current player's data
+                    const currentPlayer = gameState.players.find(p => p.id === currentPlayerId);
+                    Object.assign(gameState, loadedGame);
+                    
+                    // Add current player back if not in list
+                    if (currentPlayer && !gameState.players.some(p => p.id === currentPlayerId)) {
+                        gameState.players.push(currentPlayer);
+                    }
+                    
+                    updateUI();
+                    alert('✅ Game refreshed!');
+                }
+            }
+        }
+    }
+
     // Start game polling
     function startGamePolling() {
         if (gamePollInterval) {
@@ -1534,51 +1560,36 @@
             }
             
             try {
-                // For host: save game state and update URL
+                // For host: auto-save game every 5 seconds
                 if (isHost) {
-                    saveGameToLocalStorage(gameState);
-                    
-                    // Update URL with latest state for sharing
-                    const shareUrl = generateShareableURL();
-                    window.history.replaceState({}, '', shareUrl);
-                } 
-                // For players: try to load from host's localStorage via URL
+                    saveGameToStorage(gameState);
+                }
+                // For players: try to load latest game state
                 else {
-                    // Check if URL has updated state
-                    const urlParams = new URLSearchParams(window.location.search);
-                    const gameStateFromURL = urlParams.get('state');
+                    const loadedGame = loadGameFromStorage(gameState.code);
                     
-                    if (gameStateFromURL) {
-                        try {
-                            const decodedState = decodeURIComponent(atob(gameStateFromURL));
-                            const parsedState = JSON.parse(decodedState);
-                            
-                            if (parsedState && parsedState.code === gameState.code) {
-                                // Merge with current state (keep current player's data)
-                                const currentPlayer = gameState.players.find(p => p.id === currentPlayerId);
-                                
-                                // Update game state
-                                Object.assign(gameState, parsedState);
-                                
-                                // Ensure current player is in the list
-                                if (currentPlayer && !gameState.players.some(p => p.id === currentPlayerId)) {
-                                    gameState.players.push(currentPlayer);
-                                }
-                                
-                                // Update current player's last active time
-                                if (currentPlayer) {
-                                    const playerIndex = gameState.players.findIndex(p => p.id === currentPlayerId);
-                                    if (playerIndex !== -1) {
-                                        gameState.players[playerIndex].lastActive = Date.now();
-                                    }
-                                }
-                                
-                                // Update UI
-                                updateUI();
-                            }
-                        } catch (e) {
-                            console.log('Could not parse game state from URL');
+                    if (loadedGame && loadedGame.code === gameState.code) {
+                        // Preserve current player's data
+                        const currentPlayer = gameState.players.find(p => p.id === currentPlayerId);
+                        
+                        // Update game state but keep current player
+                        Object.assign(gameState, loadedGame);
+                        
+                        // Ensure current player is in the list
+                        if (currentPlayer && !gameState.players.some(p => p.id === currentPlayerId)) {
+                            gameState.players.push(currentPlayer);
                         }
+                        
+                        // Update current player's last active time
+                        if (currentPlayer) {
+                            const playerIndex = gameState.players.findIndex(p => p.id === currentPlayerId);
+                            if (playerIndex !== -1) {
+                                gameState.players[playerIndex].lastActive = Date.now();
+                            }
+                        }
+                        
+                        // Update UI if something changed
+                        updateUI();
                     }
                 }
                 
@@ -1589,7 +1600,7 @@
                 console.error('Error polling game:', error);
                 updateConnectionStatus(false);
             }
-        }, 3000); // Poll every 3 seconds
+        }, 5000); // Poll every 5 seconds
     }
 
     // Update connection status
@@ -1667,7 +1678,7 @@
         switch (gameState.gamePhase) {
             case 'waiting':
                 phaseTitle.textContent = 'Game Setup';
-                phaseDescription.textContent = 'Create or join a game to begin the adventure';
+                phaseDescription.textContent = isHost ? 'Share the game code with players!' : 'Waiting for host to start...';
                 document.getElementById('step1').classList.add('active');
                 document.getElementById('setupArea').classList.remove('d-none');
                 document.getElementById('cardSelectionSection').classList.add('d-none');
@@ -2022,9 +2033,9 @@
         gameState.timestamp = Date.now();
         gameState.lastSync = Date.now();
         
-        // Save to localStorage (if host) and update URL
+        // Save game (if host)
         if (isHost) {
-            saveGameToLocalStorage(gameState);
+            saveGameToStorage(gameState);
         }
         
         // Show role reveal
@@ -2064,9 +2075,9 @@
         gameState.timestamp = Date.now();
         gameState.lastSync = Date.now();
         
-        // Save to localStorage (if host) and update URL
+        // Save game (if host)
         if (isHost) {
-            saveGameToLocalStorage(gameState);
+            saveGameToStorage(gameState);
         }
         
         updateUI();
@@ -2094,8 +2105,8 @@
         gameState.timestamp = Date.now();
         gameState.lastSync = Date.now();
         
-        // Save to localStorage and update URL
-        saveGameToLocalStorage(gameState);
+        // Save game
+        saveGameToStorage(gameState);
         
         updateUI();
         
@@ -2126,9 +2137,9 @@
         gameState.timestamp = Date.now();
         gameState.lastSync = Date.now();
         
-        // Save to localStorage (if host) and update URL
+        // Save game (if host)
         if (isHost) {
-            saveGameToLocalStorage(gameState);
+            saveGameToStorage(gameState);
         }
         
         updateUI();
@@ -2184,9 +2195,9 @@
         gameState.timestamp = Date.now();
         gameState.lastSync = Date.now();
         
-        // Save to localStorage (if host) and update URL
+        // Save game (if host)
         if (isHost) {
-            saveGameToLocalStorage(gameState);
+            saveGameToStorage(gameState);
         }
         
         updateUI();
@@ -2217,8 +2228,8 @@
         gameState.lastSync = Date.now();
         document.getElementById('currentRound').textContent = gameState.round;
         
-        // Save to localStorage and update URL
-        saveGameToLocalStorage(gameState);
+        // Save game
+        saveGameToStorage(gameState);
         
         updateUI();
         
@@ -2234,7 +2245,9 @@
         }
         
         if (confirm('Are you sure you want to end the game for all players?')) {
-            // Remove game from localStorage
+            // Remove game from storage
+            localStorage.removeItem(`rajaRaniGame_${gameState.code}`);
+            
             const allGames = JSON.parse(localStorage.getItem('rajaRaniAllGames') || '{}');
             delete allGames[gameState.code];
             localStorage.setItem('rajaRaniAllGames', JSON.stringify(allGames));
@@ -2259,30 +2272,8 @@
         const gameCode = code.toUpperCase();
         
         try {
-            // Check if game exists in URL first
-            const urlParams = new URLSearchParams(window.location.search);
-            const gameStateFromURL = urlParams.get('state');
-            
-            let gameData = null;
-            
-            if (gameStateFromURL) {
-                try {
-                    const decodedState = decodeURIComponent(atob(gameStateFromURL));
-                    const parsedState = JSON.parse(decodedState);
-                    
-                    if (parsedState && parsedState.code === gameCode) {
-                        gameData = parsedState;
-                    }
-                } catch (e) {
-                    console.log('Could not parse game state from URL');
-                }
-            }
-            
-            // If not in URL, check localStorage
-            if (!gameData) {
-                const allGames = JSON.parse(localStorage.getItem('rajaRaniAllGames') || '{}');
-                gameData = allGames[gameCode];
-            }
+            // Check if game exists
+            const gameData = loadGameFromStorage(gameCode);
             
             if (!gameData) {
                 alert('Game not found! Please check the game code.\n\nMake sure:\n1. The host created the game\n2. You entered the code correctly\n3. The game hasn\'t expired');
@@ -2328,10 +2319,8 @@
             localStorage.setItem('rajaRaniPlayerName', name.trim());
             localStorage.setItem('rajaRaniIsHost', 'false');
             
-            // Update game in localStorage (if host is on same device)
-            const allGames = JSON.parse(localStorage.getItem('rajaRaniAllGames') || '{}');
-            allGames[gameState.code] = gameState;
-            localStorage.setItem('rajaRaniAllGames', JSON.stringify(allGames));
+            // Update game in storage
+            saveGameToStorage(gameState);
             
             // Start polling
             startGamePolling();
@@ -2340,7 +2329,7 @@
             updateUI();
             showGamePage();
             
-            alert(`✅ Welcome to the game, ${name}!\n\nGame: ${gameState.code}\nPlayers: ${gameState.players.length}/15\n\nWaiting for host to start...`);
+            alert(`✅ Welcome to the game, ${name}!\n\nGame: ${gameState.code}\nPlayers: ${gameState.players.length}/15\n\nWaiting for host to start...\n\n⚠️ Refresh page to see updates from other players.`);
             
             const modal = bootstrap.Modal.getInstance(document.getElementById('joinModal'));
             if (modal) {
@@ -2371,12 +2360,11 @@
             
             // Update the game state if there are still players
             if (gameState.players.length > 0) {
-                // Save to localStorage
-                const allGames = JSON.parse(localStorage.getItem('rajaRaniAllGames') || '{}');
-                allGames[gameState.code] = gameState;
-                localStorage.setItem('rajaRaniAllGames', JSON.stringify(allGames));
+                saveGameToStorage(gameState);
             } else {
                 // No players left, clean up game
+                localStorage.removeItem(`rajaRaniGame_${gameState.code}`);
+                
                 const allGames = JSON.parse(localStorage.getItem('rajaRaniAllGames') || '{}');
                 delete allGames[gameState.code];
                 localStorage.setItem('rajaRaniAllGames', JSON.stringify(allGames));
@@ -2405,7 +2393,6 @@
         const newUrl = new URL(window.location);
         newUrl.searchParams.delete('code');
         newUrl.searchParams.delete('name');
-        newUrl.searchParams.delete('state');
         window.history.replaceState({}, '', newUrl);
         
         // Show home page
@@ -2558,7 +2545,7 @@
             delete gameState.votes[currentPlayerId];
             gameState.policeVote = null;
             if (isHost) {
-                saveGameToLocalStorage(gameState);
+                saveGameToStorage(gameState);
             }
             updateUI();
         });
@@ -2568,18 +2555,29 @@
         document.getElementById('endGameBtn').addEventListener('click', endGame);
         document.getElementById('copyCodeBtn').addEventListener('click', () => {
             if (gameState.code) {
-                // Copy the full shareable URL
-                const shareUrl = generateShareableURL();
-                navigator.clipboard.writeText(`Join my Raja Rani game!\n\nGame Code: ${gameState.code}\n\nJoin URL: ${shareUrl}`).then(() => {
+                const shareLink = `${window.location.origin}${window.location.pathname}?code=${gameState.code}`;
+                navigator.clipboard.writeText(`Join my Raja Rani game!\n\nGame Code: ${gameState.code}\n\nJoin URL: ${shareLink}`).then(() => {
                     alert('Game info copied to clipboard!');
                 }).catch(err => {
                     console.error('Failed to copy: ', err);
-                    alert('Failed to copy. Please copy manually: ' + shareUrl);
+                    alert('Failed to copy. Please copy manually: Game Code: ' + gameState.code);
                 });
             }
         });
         
         document.getElementById('generateCodeBtn').addEventListener('click', generateGameCode);
+        
+        // Add sync button
+        const syncButton = document.createElement('button');
+        syncButton.className = 'btn nav-btn ms-2';
+        syncButton.id = 'syncGameBtn';
+        syncButton.innerHTML = '<i class="fas fa-sync-alt"></i><span class="d-none d-md-inline ms-1">Sync</span>';
+        syncButton.title = 'Sync Game State';
+        syncButton.addEventListener('click', syncGame);
+        
+        // Add to navbar
+        const buttonGroup = document.querySelector('.btn-group');
+        buttonGroup.insertBefore(syncButton, document.getElementById('showInstructionsBtn'));
         
         // Join form submission
         document.getElementById('joinForm').addEventListener('submit', function(e) {
