@@ -1,0 +1,2518 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Raja Rani - The Ultimate Social Deduction Game</title>
+    
+    <!-- Bootstrap 5 -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800;900&family=Orbitron:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+    <!-- Animate.css -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css">
+    
+    <style>
+        :root {
+            --primary-purple: #8A2BE2;
+            --secondary-orange: #FF6B35;
+            --dark-purple: #4B0082;
+            --light-purple: #E6E6FA;
+            --gold: #FFD700;
+            --silver: #C0C0C0;
+            --bronze: #CD7F32;
+            --success-green: #2E8B57;
+            --danger-red: #DC143C;
+            --warning-yellow: #FFA500;
+            --info-blue: #1E90FF;
+            
+            --neon-glow: 0 0 20px rgba(138, 43, 226, 0.7);
+            --deep-shadow: 0 20px 40px rgba(0, 0, 0, 0.3);
+            --float-animation: float 6s ease-in-out infinite;
+            --pulse-animation: pulse 2s infinite;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Poppins', sans-serif;
+            background: linear-gradient(135deg, #0c0c0c 0%, #1a1a2e 50%, #16213e 100%);
+            color: white;
+            min-height: 100vh;
+            overflow-x: hidden;
+            position: relative;
+        }
+
+        body::before {
+            content: '';
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: 
+                radial-gradient(circle at 20% 30%, rgba(138, 43, 226, 0.15) 0%, transparent 50%),
+                radial-gradient(circle at 80% 70%, rgba(255, 107, 53, 0.15) 0%, transparent 50%);
+            z-index: -1;
+            animation: backgroundShift 20s ease-in-out infinite alternate;
+        }
+
+        @keyframes backgroundShift {
+            0% { transform: translate(0, 0) scale(1); }
+            100% { transform: translate(-50px, 50px) scale(1.1); }
+        }
+
+        /* Custom Scrollbar */
+        ::-webkit-scrollbar {
+            width: 10px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 10px;
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: linear-gradient(to bottom, var(--primary-purple), var(--secondary-orange));
+            border-radius: 10px;
+            transition: all 0.3s ease;
+        }
+
+        ::-webkit-scrollbar-thumb:hover {
+            background: linear-gradient(to bottom, var(--secondary-orange), var(--primary-purple));
+            box-shadow: var(--neon-glow);
+        }
+
+        /* Navigation */
+        .main-nav {
+            background: rgba(10, 10, 20, 0.95);
+            backdrop-filter: blur(15px);
+            border-bottom: 2px solid var(--primary-purple);
+            box-shadow: 0 5px 25px rgba(0, 0, 0, 0.5);
+            z-index: 1000;
+        }
+
+        .nav-logo {
+            font-family: 'Orbitron', sans-serif;
+            font-weight: 800;
+            font-size: 1.8rem;
+            background: linear-gradient(45deg, var(--gold), var(--primary-purple));
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+            text-shadow: 0 0 15px rgba(138, 43, 226, 0.5);
+        }
+
+        .nav-btn {
+            background: rgba(255, 255, 255, 0.1);
+            border: 2px solid transparent;
+            border-radius: 10px;
+            padding: 8px 15px;
+            color: white;
+            font-weight: 600;
+            transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            backdrop-filter: blur(10px);
+        }
+
+        .nav-btn:hover {
+            transform: translateY(-3px) scale(1.05);
+            border-color: var(--secondary-orange);
+            box-shadow: 0 10px 20px rgba(255, 107, 53, 0.3);
+        }
+
+        .game-code-display {
+            font-family: 'Orbitron', monospace;
+            font-size: 1.3rem;
+            font-weight: 700;
+            letter-spacing: 3px;
+            background: linear-gradient(45deg, var(--primary-purple), var(--secondary-orange));
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+            padding: 5px 15px;
+            border: 2px dashed var(--secondary-orange);
+            border-radius: 10px;
+            animation: var(--pulse-animation);
+        }
+
+        /* Game Container */
+        .game-container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        /* Cards - Enhanced 3D */
+        .card-3d {
+            position: relative;
+            height: 180px;
+            transform-style: preserve-3d;
+            transition: transform 0.8s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            cursor: pointer;
+            border-radius: 15px;
+            perspective: 1000px;
+        }
+
+        .card-3d:hover:not(.locked) {
+            transform: translateY(-10px) rotateX(5deg);
+        }
+
+        .card-3d.flipped {
+            transform: rotateY(180deg);
+        }
+
+        .card-face {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            backface-visibility: hidden;
+            border-radius: 15px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+            box-shadow: var(--deep-shadow);
+            overflow: hidden;
+        }
+
+        .card-back {
+            background: linear-gradient(135deg, var(--primary-purple) 0%, var(--dark-purple) 100%);
+            color: white;
+            transform: rotateY(0deg);
+            border: 3px solid rgba(255, 255, 255, 0.2);
+        }
+
+        .card-back::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: radial-gradient(circle, rgba(255, 255, 255, 0.1) 0%, transparent 70%);
+            animation: rotate 20s linear infinite;
+        }
+
+        .card-front {
+            background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+            transform: rotateY(180deg);
+            border: 3px solid;
+            border-image: linear-gradient(45deg, var(--gold), var(--primary-purple)) 1;
+        }
+
+        .card-icon {
+            font-size: 3rem;
+            margin-bottom: 10px;
+            filter: drop-shadow(0 0 10px currentColor);
+        }
+
+        .card-points {
+            font-size: 1.5rem;
+            font-weight: 800;
+            color: var(--gold);
+            text-shadow: 0 0 10px rgba(255, 215, 0, 0.5);
+        }
+
+        /* Player Cards */
+        .player-card {
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 15px;
+            padding: 20px;
+            transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            border: 2px solid transparent;
+            backdrop-filter: blur(10px);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .player-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.1), transparent);
+            transition: 0.5s;
+        }
+
+        .player-card:hover::before {
+            left: 100%;
+        }
+
+        .player-card:hover {
+            transform: translateY(-8px) scale(1.02);
+            border-color: var(--secondary-orange);
+            box-shadow: 0 15px 30px rgba(255, 107, 53, 0.2);
+        }
+
+        .player-avatar {
+            width: 80px;
+            height: 80px;
+            border-radius: 50%;
+            margin: 0 auto 15px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 2.2rem;
+            border: 3px solid;
+            background: rgba(0, 0, 0, 0.3);
+            box-shadow: 0 0 20px currentColor;
+        }
+
+        .player-role {
+            font-size: 0.9rem;
+            padding: 5px 10px;
+            border-radius: 20px;
+            font-weight: 600;
+            display: inline-block;
+            background: rgba(255, 255, 255, 0.1);
+            margin-top: 5px;
+        }
+
+        /* Game Sections */
+        .game-section {
+            background: rgba(20, 20, 40, 0.7);
+            border-radius: 20px;
+            padding: 30px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(15px);
+            box-shadow: 
+                0 20px 40px rgba(0, 0, 0, 0.4),
+                inset 0 1px 0 rgba(255, 255, 255, 0.1);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .game-section::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 3px;
+            background: linear-gradient(90deg, var(--primary-purple), var(--secondary-orange), var(--primary-purple));
+            background-size: 200% 100%;
+            animation: shimmer 3s infinite linear;
+        }
+
+        /* Buttons */
+        .btn-neon {
+            background: linear-gradient(45deg, var(--primary-purple), var(--secondary-orange));
+            border: none;
+            border-radius: 12px;
+            padding: 15px 30px;
+            color: white;
+            font-weight: 700;
+            font-size: 1.1rem;
+            letter-spacing: 1px;
+            position: relative;
+            overflow: hidden;
+            transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            box-shadow: 0 10px 20px rgba(138, 43, 226, 0.3);
+        }
+
+        .btn-neon::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+            transition: 0.5s;
+        }
+
+        .btn-neon:hover::before {
+            left: 100%;
+        }
+
+        .btn-neon:hover {
+            transform: translateY(-5px) scale(1.05);
+            box-shadow: 
+                0 15px 30px rgba(138, 43, 226, 0.5),
+                0 0 30px rgba(255, 107, 53, 0.5);
+        }
+
+        .btn-neon:active {
+            transform: translateY(0) scale(0.98);
+        }
+
+        /* Action Center */
+        .action-center {
+            background: linear-gradient(135deg, rgba(138, 43, 226, 0.1), rgba(255, 107, 53, 0.1));
+            border-radius: 20px;
+            padding: 40px;
+            border: 2px solid rgba(255, 255, 255, 0.1);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .action-center::before {
+            content: '';
+            position: absolute;
+            top: -2px;
+            left: -2px;
+            right: -2px;
+            bottom: -2px;
+            background: linear-gradient(45deg, var(--primary-purple), var(--secondary-orange), var(--primary-purple));
+            z-index: -1;
+            filter: blur(20px);
+            opacity: 0.5;
+            animation: rotate 3s linear infinite;
+        }
+
+        /* Scoreboard */
+        .scoreboard {
+            background: linear-gradient(135deg, rgba(26, 26, 46, 0.8), rgba(22, 33, 62, 0.8));
+            border-radius: 15px;
+            overflow: hidden;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .score-row {
+            transition: all 0.3s ease;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .score-row:hover {
+            background: rgba(255, 255, 255, 0.05);
+            transform: translateX(10px);
+        }
+
+        .rank-badge {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 800;
+            font-size: 1.2rem;
+        }
+
+        .rank-1 { background: linear-gradient(45deg, var(--gold), #FFA500); }
+        .rank-2 { background: linear-gradient(45deg, var(--silver), #C0C0C0); }
+        .rank-3 { background: linear-gradient(45deg, var(--bronze), #8B4513); }
+
+        /* Modals */
+        .custom-modal {
+            background: rgba(20, 20, 40, 0.95);
+            backdrop-filter: blur(20px);
+            border: 2px solid var(--primary-purple);
+            border-radius: 20px;
+            box-shadow: 
+                0 30px 60px rgba(0, 0, 0, 0.5),
+                0 0 50px rgba(138, 43, 226, 0.3);
+        }
+
+        .modal-header {
+            border-bottom: 2px solid rgba(255, 255, 255, 0.1);
+            background: linear-gradient(90deg, rgba(138, 43, 226, 0.1), rgba(255, 107, 53, 0.1));
+        }
+
+        /* Animations */
+        @keyframes float {
+            0%, 100% { transform: translateY(0) rotate(0deg); }
+            50% { transform: translateY(-20px) rotate(5deg); }
+        }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.7; }
+        }
+
+        @keyframes rotate {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        @keyframes shimmer {
+            0% { background-position: -200% 0; }
+            100% { background-position: 200% 0; }
+        }
+
+        @keyframes glow {
+            0%, 100% { box-shadow: 0 0 10px var(--primary-purple); }
+            50% { box-shadow: 0 0 30px var(--primary-purple); }
+        }
+
+        /* Responsive Design */
+        @media (max-width: 768px) {
+            .game-container {
+                padding: 10px;
+            }
+            
+            .card-3d {
+                height: 150px;
+            }
+            
+            .player-avatar {
+                width: 60px;
+                height: 60px;
+                font-size: 1.8rem;
+            }
+            
+            .nav-logo {
+                font-size: 1.5rem;
+            }
+            
+            .game-code-display {
+                font-size: 1rem;
+                letter-spacing: 2px;
+            }
+            
+            .btn-neon {
+                padding: 12px 20px;
+                font-size: 1rem;
+            }
+            
+            .action-center {
+                padding: 20px;
+            }
+        }
+
+        @media (max-width: 576px) {
+            .card-3d {
+                height: 130px;
+            }
+            
+            .card-icon {
+                font-size: 2rem;
+            }
+            
+            .player-card {
+                padding: 15px;
+            }
+            
+            .game-section {
+                padding: 15px;
+            }
+            
+            .nav-btn {
+                padding: 6px 10px;
+                font-size: 0.9rem;
+            }
+        }
+
+        @media (max-width: 400px) {
+            .card-3d {
+                height: 110px;
+            }
+            
+            .card-points {
+                font-size: 1.2rem;
+            }
+            
+            .player-avatar {
+                width: 50px;
+                height: 50px;
+                font-size: 1.5rem;
+            }
+        }
+
+        /* Game Phase Indicators */
+        .phase-indicator {
+            background: linear-gradient(45deg, var(--dark-purple), var(--primary-purple));
+            border-radius: 25px;
+            padding: 10px 25px;
+            display: inline-block;
+            font-weight: 700;
+            letter-spacing: 1px;
+            text-transform: uppercase;
+            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.3);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .phase-indicator::after {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: radial-gradient(circle, rgba(255, 255, 255, 0.1) 0%, transparent 70%);
+            animation: rotate 10s linear infinite;
+        }
+
+        /* Role Colors */
+        .role-raja { color: #FFD700; text-shadow: 0 0 10px #FFD700; }
+        .role-rani { color: #FF69B4; text-shadow: 0 0 10px #FF69B4; }
+        .role-thirudan { color: #32CD32; text-shadow: 0 0 10px #32CD32; }
+        .role-police { color: #1E90FF; text-shadow: 0 0 10px #1E90FF; }
+        .role-mandhiri { color: #9B30FF; text-shadow: 0 0 10px #9B30FF; }
+        .role-senapathi { color: #FF4500; text-shadow: 0 0 10px #FF4500; }
+
+        /* Loading Animation */
+        .loading-dots {
+            display: inline-flex;
+            gap: 5px;
+        }
+
+        .loading-dots span {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background: var(--secondary-orange);
+            animation: bounce 1.4s infinite ease-in-out both;
+        }
+
+        .loading-dots span:nth-child(1) { animation-delay: -0.32s; }
+        .loading-dots span:nth-child(2) { animation-delay: -0.16s; }
+
+        @keyframes bounce {
+            0%, 80%, 100% { transform: scale(0); }
+            40% { transform: scale(1); }
+        }
+
+        /* Particle Effects */
+        .particles-container {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: -1;
+        }
+
+        .particle {
+            position: absolute;
+            background: radial-gradient(circle, var(--primary-purple), transparent);
+            border-radius: 50%;
+            animation: float-particle 20s infinite linear;
+        }
+
+        @keyframes float-particle {
+            0% {
+                transform: translateY(100vh) translateX(0) rotate(0deg);
+                opacity: 0;
+            }
+            10% {
+                opacity: 1;
+            }
+            90% {
+                opacity: 1;
+            }
+            100% {
+                transform: translateY(-100px) translateX(100px) rotate(360deg);
+                opacity: 0;
+            }
+        }
+
+        /* Confetti Effect */
+        .confetti {
+            position: fixed;
+            width: 10px;
+            height: 20px;
+            background: var(--secondary-orange);
+            top: 0;
+            opacity: 0;
+            z-index: 9999;
+        }
+
+        /* Achievement Badges */
+        .achievement-badge {
+            width: 60px;
+            height: 60px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.5rem;
+            background: linear-gradient(45deg, var(--gold), var(--secondary-orange));
+            box-shadow: 0 5px 15px rgba(255, 215, 0, 0.3);
+            margin: 0 auto 10px;
+            animation: var(--float-animation);
+        }
+
+        /* Special Police Badge */
+        .police-badge {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            background: #1E90FF;
+            color: white;
+            padding: 5px 10px;
+            border-radius: 15px;
+            font-size: 0.8rem;
+            font-weight: bold;
+            animation: pulse 1.5s infinite;
+        }
+
+        /* Special Host Badge */
+        .host-badge {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            background: #FFD700;
+            color: #000;
+            padding: 5px 10px;
+            border-radius: 15px;
+            font-size: 0.8rem;
+            font-weight: bold;
+        }
+
+        /* Connection Status */
+        .connection-status {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            z-index: 1000;
+        }
+
+        .connection-dot {
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            display: inline-block;
+            margin-right: 5px;
+        }
+
+        .online { background-color: #2E8B57; box-shadow: 0 0 10px #2E8B57; }
+        .offline { background-color: #DC143C; box-shadow: 0 0 10px #DC143C; }
+        .connecting { background-color: #FFA500; box-shadow: 0 0 10px #FFA500; animation: pulse 1s infinite; }
+    </style>
+</head>
+<body>
+    <!-- Connection Status -->
+    <div class="connection-status">
+        <div class="d-flex align-items-center bg-dark bg-opacity-75 px-3 py-2 rounded-pill">
+            <div class="connection-dot online" id="connectionDot"></div>
+            <small id="connectionStatus">Connected</small>
+        </div>
+    </div>
+
+    <!-- Particles Background -->
+    <div class="particles-container" id="particles"></div>
+    
+    <!-- Navigation -->
+    <nav class="navbar navbar-expand-lg main-nav fixed-top">
+        <div class="container-fluid">
+            <div class="d-flex align-items-center">
+                <button class="btn nav-btn me-2 d-lg-none" id="mobileMenuBtn">
+                    <i class="fas fa-bars"></i>
+                </button>
+                <div class="nav-logo">
+                    <i class="fas fa-crown me-2"></i>RAJA RANI
+                </div>
+            </div>
+            
+            <div class="d-flex align-items-center">
+                <div class="game-code-display me-3 d-none d-md-block" id="topGameCode">
+                    <i class="fas fa-key me-2"></i><span id="gameCodeDisplay">-----</span>
+                </div>
+                
+                <div class="btn-group">
+                    <button class="btn nav-btn me-2" id="showScoreboardBtn" title="Scoreboard">
+                        <i class="fas fa-trophy"></i>
+                        <span class="d-none d-md-inline"> Scoreboard</span>
+                    </button>
+                    <button class="btn nav-btn me-2" id="showInstructionsBtn" title="Instructions">
+                        <i class="fas fa-info-circle"></i>
+                        <span class="d-none d-md-inline"> Help</span>
+                    </button>
+                    <button class="btn nav-btn btn-danger" id="closeGameBtn" title="Exit Game">
+                        <i class="fas fa-sign-out-alt"></i>
+                        <span class="d-none d-md-inline"> Exit</span>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </nav>
+    
+    <!-- Mobile Game Code -->
+    <div class="container-fluid d-block d-md-none mt-5 pt-4">
+        <div class="d-flex justify-content-center">
+            <div class="game-code-display">
+                <i class="fas fa-key me-2"></i><span id="mobileGameCode">-----</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- Home Page -->
+    <div id="homePage" class="container-fluid py-5 mt-5">
+        <div class="row justify-content-center">
+            <div class="col-12 text-center mb-5">
+                <div class="achievement-badge animate__animated animate__pulse animate__infinite">
+                    <i class="fas fa-crown"></i>
+                </div>
+                <h1 class="display-3 fw-bold mb-3 text-gradient">
+                    <span class="text-warning">RAJA</span> <span class="text-purple">RANI</span>
+                </h1>
+                <p class="lead text-light mb-4">The Ultimate Social Deduction Game</p>
+                <div class="phase-indicator animate__animated animate__pulse">
+                    <i class="fas fa-gamepad me-2"></i>REAL-TIME MULTIPLAYER • HIDDEN ROLES • STRATEGIC VOTING
+                </div>
+            </div>
+            
+            <div class="col-lg-4 col-md-6 mb-4">
+                <div class="game-section h-100 animate__animated animate__fadeInUp">
+                    <div class="text-center mb-4">
+                        <div class="achievement-badge bg-primary">
+                            <i class="fas fa-plus-circle"></i>
+                        </div>
+                        <h3 class="fw-bold mb-3">Create New Game</h3>
+                        <p class="text-light mb-4">Start a thrilling new game session and become the Host</p>
+                        <button class="btn btn-neon w-100" id="createGameBtn">
+                            <i class="fas fa-plus me-2"></i>CREATE GAME ROOM
+                        </button>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="col-lg-4 col-md-6 mb-4">
+                <div class="game-section h-100 animate__animated animate__fadeInUp animate__delay-1s">
+                    <div class="text-center mb-4">
+                        <div class="achievement-badge bg-success">
+                            <i class="fas fa-user-plus"></i>
+                        </div>
+                        <h3 class="fw-bold mb-3">Join Game</h3>
+                        <p class="text-light mb-4">Enter a game code to join your friends' epic battle</p>
+                        <button class="btn btn-neon w-100" id="joinExistingGameBtn">
+                            <i class="fas fa-sign-in-alt me-2"></i>JOIN EXISTING GAME
+                        </button>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="col-lg-4 col-md-12 mb-4">
+                <div class="game-section h-100 animate__animated animate__fadeInUp animate__delay-2s">
+                    <div class="text-center mb-4">
+                        <div class="achievement-badge bg-warning">
+                            <i class="fas fa-graduation-cap"></i>
+                        </div>
+                        <h3 class="fw-bold mb-3">Learn to Play</h3>
+                        <p class="text-light mb-4">Master the strategies and become a Raja Rani champion</p>
+                        <button class="btn btn-neon w-100" id="homeInstructionsBtn">
+                            <i class="fas fa-book-open me-2"></i>GAME GUIDE
+                        </button>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="col-12 mt-5">
+                <div class="game-section">
+                    <h4 class="fw-bold mb-4 text-center"><i class="fas fa-star text-warning me-2"></i>Quick Start Guide</h4>
+                    <div class="row">
+                        <div class="col-md-3 col-6 mb-3">
+                            <div class="text-center">
+                                <div class="player-avatar role-raja mb-2 mx-auto">
+                                    <i class="fas fa-crown"></i>
+                                </div>
+                                <h6 class="fw-bold">Raja (King)</h6>
+                                <small class="text-light">1000 Points</small>
+                            </div>
+                        </div>
+                        <div class="col-md-3 col-6 mb-3">
+                            <div class="text-center">
+                                <div class="player-avatar role-rani mb-2 mx-auto">
+                                    <i class="fas fa-gem"></i>
+                                </div>
+                                <h6 class="fw-bold">Rani (Queen)</h6>
+                                <small class="text-light">500 Points</small>
+                            </div>
+                        </div>
+                        <div class="col-md-3 col-6 mb-3">
+                            <div class="text-center">
+                                <div class="player-avatar role-thirudan mb-2 mx-auto">
+                                    <i class="fas fa-user-secret"></i>
+                                </div>
+                                <h6 class="fw-bold">Thirudan (Thief)</h6>
+                                <small class="text-light">0 Points</small>
+                            </div>
+                        </div>
+                        <div class="col-md-3 col-6 mb-3">
+                            <div class="text-center">
+                                <div class="player-avatar role-police mb-2 mx-auto">
+                                    <i class="fas fa-shield-alt"></i>
+                                </div>
+                                <h6 class="fw-bold">Police</h6>
+                                <small class="text-light">100 Points</small>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Game Container -->
+    <div id="gameContainer" class="container-fluid py-5 mt-5 d-none">
+        <div class="row">
+            <!-- Main Game Area -->
+            <div class="col-lg-8 col-12 mb-4">
+                <div class="game-section animate__animated animate__fadeIn">
+                    <!-- Game Flow Steps -->
+                    <div class="row mb-4">
+                        <div class="col-3 text-center">
+                            <div class="phase-indicator active" id="step1">
+                                <i class="fas fa-user-plus me-1"></i>
+                                <span class="d-none d-md-inline">Join</span>
+                            </div>
+                        </div>
+                        <div class="col-3 text-center">
+                            <div class="phase-indicator" id="step2">
+                                <i class="fas fa-cards me-1"></i>
+                                <span class="d-none d-md-inline">Cards</span>
+                            </div>
+                        </div>
+                        <div class="col-3 text-center">
+                            <div class="phase-indicator" id="step3">
+                                <i class="fas fa-vote-yea me-1"></i>
+                                <span class="d-none d-md-inline">Vote</span>
+                            </div>
+                        </div>
+                        <div class="col-3 text-center">
+                            <div class="phase-indicator" id="step4">
+                                <i class="fas fa-trophy me-1"></i>
+                                <span class="d-none d-md-inline">Results</span>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Game Phase Title -->
+                    <div class="text-center mb-4">
+                        <h2 class="fw-bold" id="gamePhaseTitle">Game Setup</h2>
+                        <p class="text-light" id="gamePhaseDescription">Create or join a game to begin the adventure</p>
+                    </div>
+                    
+                    <!-- Setup Area -->
+                    <div id="setupArea">
+                        <div class="action-center text-center mb-4">
+                            <h3 class="fw-bold mb-3"><i class="fas fa-code me-2"></i>Game Code</h3>
+                            <div class="display-1 fw-bold mb-3 game-code-display" id="gameCode">-----</div>
+                            <div class="row justify-content-center g-3">
+                                <div class="col-md-4 col-6">
+                                    <button class="btn btn-neon w-100" id="generateCodeBtn">
+                                        <i class="fas fa-key me-2"></i>New Code
+                                    </button>
+                                </div>
+                                <div class="col-md-4 col-6">
+                                    <button class="btn btn-neon w-100" id="copyCodeBtn">
+                                        <i class="fas fa-copy me-2"></i>Copy
+                                    </button>
+                                </div>
+                                <div class="col-md-4 col-12">
+                                    <button class="btn btn-neon w-100" id="joinGameBtn">
+                                        <i class="fas fa-user-plus me-2"></i>Join Game
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- Players List -->
+                        <div class="mb-4">
+                            <h4 class="fw-bold mb-3"><i class="fas fa-users me-2"></i>Players <span class="badge bg-primary" id="playerCount">0</span>/15</h4>
+                            <div class="row g-3" id="playersList">
+                                <!-- Players will be added here -->
+                            </div>
+                        </div>
+                        
+                        <!-- Start Game Button -->
+                        <div class="action-center text-center">
+                            <h3 class="fw-bold mb-3">Ready to Begin?</h3>
+                            <p class="text-light mb-4" id="startGameDescription">Waiting for players to join...</p>
+                            <button class="btn btn-neon btn-lg px-5" id="startGameBtn" disabled>
+                                <i class="fas fa-play me-2"></i>START THE GAME
+                            </button>
+                        </div>
+                    </div>
+                    
+                    <!-- Card Selection Area -->
+                    <div id="cardSelectionSection" class="d-none">
+                        <div class="action-center text-center mb-4">
+                            <h2 class="fw-bold mb-3"><i class="fas fa-user-secret me-2"></i>Choose Your Secret Role</h2>
+                            <p class="text-light">Tap a card to reveal your hidden identity. Choose wisely!</p>
+                        </div>
+                        
+                        <div class="row g-3" id="cardsGrid">
+                            <!-- Cards will be added here -->
+                        </div>
+                        
+                        <div class="action-center text-center mt-4">
+                            <p class="text-light mb-3" id="cardsStatus">Waiting for players to select cards...</p>
+                            <button class="btn btn-neon btn-lg px-5" id="continueToVotingBtn" disabled>
+                                <i class="fas fa-arrow-right me-2"></i>CONTINUE TO VOTING
+                            </button>
+                        </div>
+                    </div>
+                    
+                    <!-- Voting Area -->
+                    <div id="votingSection" class="d-none">
+                        <div class="action-center text-center mb-4">
+                            <h2 class="fw-bold mb-3"><i class="fas fa-search me-2"></i>Find the Thirudan!</h2>
+                            <p class="text-light" id="votingInstruction">Only the Police can identify the thief. Choose carefully!</p>
+                        </div>
+                        
+                        <div class="row g-3" id="votingGrid">
+                            <!-- Voting cards will be added here -->
+                        </div>
+                        
+                        <div class="action-center text-center mt-4">
+                            <div class="row justify-content-center g-3">
+                                <div class="col-md-4">
+                                    <button class="btn btn-neon w-100" id="submitVoteBtn" disabled>
+                                        <i class="fas fa-paper-plane me-2"></i>Submit Vote
+                                    </button>
+                                </div>
+                                <div class="col-md-4">
+                                    <button class="btn btn-neon w-100" id="clearVoteBtn">
+                                        <i class="fas fa-undo me-2"></i>Clear Vote
+                                    </button>
+                                </div>
+                                <div class="col-md-4">
+                                    <button class="btn btn-neon w-100" id="showResultsBtn" disabled>
+                                        <i class="fas fa-forward me-2"></i>Show Results
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Results Area -->
+                    <div id="roundResultsSection" class="d-none">
+                        <div class="action-center text-center">
+                            <h2 class="fw-bold mb-3"><i class="fas fa-trophy me-2"></i>Round <span id="currentRound">1</span> Complete!</h2>
+                            <div class="display-6 mb-4" id="roundResult"></div>
+                            
+                            <div class="row g-3" id="roundResultsGrid">
+                                <!-- Results will be added here -->
+                            </div>
+                            
+                            <div class="row justify-content-center g-3 mt-4">
+                                <div class="col-md-6">
+                                    <button class="btn btn-neon w-100 btn-lg" id="nextRoundBtn">
+                                        <i class="fas fa-redo me-2"></i>NEXT ROUND
+                                    </button>
+                                </div>
+                                <div class="col-md-6">
+                                    <button class="btn btn-neon w-100 btn-lg" id="endGameBtn">
+                                        <i class="fas fa-flag-checkered me-2"></i>END GAME
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Side Panel -->
+            <div class="col-lg-4 col-12">
+                <div class="game-section h-100">
+                    <h4 class="fw-bold mb-4"><i class="fas fa-chart-line me-2"></i>Live Scoreboard</h4>
+                    
+                    <!-- Score Table -->
+                    <div class="scoreboard mb-4">
+                        <div class="table-responsive">
+                            <table class="table table-dark table-hover mb-0">
+                                <thead>
+                                    <tr>
+                                        <th>#</th>
+                                        <th>Player</th>
+                                        <th>Points</th>
+                                        <th>Role</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="scoreTable">
+                                    <!-- Scores will be added here -->
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                    
+                    <!-- Game Info -->
+                    <div class="game-section">
+                        <h5 class="fw-bold mb-3"><i class="fas fa-info-circle me-2"></i>Game Info</h5>
+                        <div class="row g-2">
+                            <div class="col-6">
+                                <div class="player-card text-center p-3">
+                                    <i class="fas fa-users fs-4 mb-2"></i>
+                                    <div class="fw-bold" id="infoPlayerCount">0/15</div>
+                                    <small class="text-light">Players</small>
+                                </div>
+                            </div>
+                            <div class="col-6">
+                                <div class="player-card text-center p-3">
+                                    <i class="fas fa-flag fs-4 mb-2"></i>
+                                    <div class="fw-bold" id="infoRound">1</div>
+                                    <small class="text-light">Round</small>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modals -->
+    
+    <!-- Join Game Modal -->
+    <div class="modal fade" id="joinModal" tabindex="-1">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content custom-modal">
+                <div class="modal-header">
+                    <h5 class="modal-title fw-bold"><i class="fas fa-user-plus me-2"></i>Join Game</h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <form id="joinForm">
+                        <div class="mb-3">
+                            <label class="form-label">Your Name</label>
+                            <input type="text" class="form-control form-control-lg" id="playerName" 
+                                   placeholder="Enter your name" required maxlength="20">
+                            <div class="form-text">Choose a unique name for this game</div>
+                        </div>
+                        <div class="mb-4">
+                            <label class="form-label">Game Code</label>
+                            <input type="text" class="form-control form-control-lg" id="joinCode" 
+                                   placeholder="Enter 5-6 character code" required maxlength="6" 
+                                   style="letter-spacing: 3px; text-transform: uppercase;">
+                            <div class="form-text">Get this code from the game host</div>
+                        </div>
+                        <div class="alert alert-info mb-3">
+                            <i class="fas fa-info-circle me-2"></i>
+                            <strong>Multiplayer Tip:</strong> The host must create the game first, then share the code with other players.
+                        </div>
+                        <button type="submit" class="btn btn-neon w-100">
+                            <i class="fas fa-sign-in-alt me-2"></i>JOIN GAME
+                        </button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Instructions Modal -->
+    <div class="modal fade" id="instructionsModal" tabindex="-1">
+        <div class="modal-dialog modal-dialog-centered modal-lg">
+            <div class="modal-content custom-modal">
+                <div class="modal-header">
+                    <h5 class="modal-title fw-bold"><i class="fas fa-book-open me-2"></i>Game Instructions</h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="accordion" id="instructionsAccordion">
+                        <div class="accordion-item bg-transparent text-white">
+                            <h2 class="accordion-header">
+                                <button class="accordion-button bg-dark text-white" type="button" data-bs-toggle="collapse" data-bs-target="#collapseOne">
+                                    <i class="fas fa-play-circle me-2"></i>How to Play
+                                </button>
+                            </h2>
+                            <div id="collapseOne" class="accordion-collapse collapse show" data-bs-parent="#instructionsAccordion">
+                                <div class="accordion-body">
+                                    <ol class="list-group list-group-numbered">
+                                        <li class="list-group-item bg-transparent text-white border-secondary">One player creates a game and shares the code</li>
+                                        <li class="list-group-item bg-transparent text-white border-secondary">Players join using the code</li>
+                                        <li class="list-group-item bg-transparent text-white border-secondary">First 4 players get Raja, Rani, Thirudan, Police roles</li>
+                                        <li class="list-group-item bg-transparent text-white border-secondary">Only Police can identify the Thirudan</li>
+                                        <li class="list-group-item bg-transparent text-white border-secondary">Points are awarded based on Police's success</li>
+                                    </ol>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="accordion-item bg-transparent text-white">
+                            <h2 class="accordion-header">
+                                <button class="accordion-button collapsed bg-dark text-white" type="button" data-bs-toggle="collapse" data-bs-target="#collapseTwo">
+                                    <i class="fas fa-crown me-2"></i>Roles & Points
+                                </button>
+                            </h2>
+                            <div id="collapseTwo" class="accordion-collapse collapse" data-bs-parent="#instructionsAccordion">
+                                <div class="accordion-body">
+                                    <div class="row">
+                                        <div class="col-md-6 mb-3">
+                                            <div class="player-card">
+                                                <div class="player-avatar role-raja mb-2">
+                                                    <i class="fas fa-crown"></i>
+                                                </div>
+                                                <h6>Raja (King)</h6>
+                                                <div class="text-warning fw-bold">1000 points</div>
+                                            </div>
+                                        </div>
+                                        <div class="col-md-6 mb-3">
+                                            <div class="player-card">
+                                                <div class="player-avatar role-rani mb-2">
+                                                    <i class="fas fa-gem"></i>
+                                                </div>
+                                                <h6>Rani (Queen)</h6>
+                                                <div class="text-warning fw-bold">500 points</div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Role Reveal Modal -->
+    <div class="modal fade" id="roleRevealModal" tabindex="-1">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content custom-modal">
+                <div class="modal-body text-center p-5">
+                    <div class="display-1 mb-4" id="roleIcon"></div>
+                    <h2 class="fw-bold mb-3" id="roleName"></h2>
+                    <div class="display-4 fw-bold text-warning mb-4" id="rolePoints"></div>
+                    <p class="text-light mb-4" id="roleDescription"></p>
+                    <button class="btn btn-neon px-5" data-bs-dismiss="modal">
+                        <i class="fas fa-check me-2"></i>LET'S PLAY!
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Bootstrap JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"></script>
+    
+    <script>
+        // Game state
+        const gameState = {
+            code: null,
+            players: [],
+            cards: [],
+            gamePhase: 'waiting',
+            votes: {},
+            round: 1,
+            votingComplete: false,
+            policeVote: null,
+            thirudanId: null,
+            policeId: null,
+            timestamp: Date.now(),
+            hostId: null,
+            lastSync: Date.now()
+        };
+
+        let currentPlayerId = null;
+        let selectedVote = null;
+        let isHost = false;
+        let gamePollInterval = null;
+        let serverURL = 'https://jsonblob.com/api/jsonBlob';
+
+        // Role definitions
+        const roleDefinitions = [
+            { name: "Raja", points: 1000, icon: "fas fa-crown", color: "#FFD700", description: "The King - Supreme ruler with highest authority" },
+            { name: "Rani", points: 500, icon: "fas fa-gem", color: "#FF69B4", description: "The Queen - Royal majesty and power" },
+            { name: "Thirudan", points: 0, icon: "fas fa-user-secret", color: "#32CD32", description: "The Thief - Master of stealth and deception" },
+            { name: "Police", points: 100, icon: "fas fa-shield-alt", color: "#1E90FF", description: "The Police - Protector and investigator" },
+            { name: "Mandhiri", points: 900, icon: "fas fa-landmark", color: "#9B30FF", description: "The Minister - Advisor to the throne" },
+            { name: "Senapathi", points: 860, icon: "fas fa-helmet-battle", color: "#FF4500", description: "The Commander - Leader of the army" },
+            { name: "Thalapathi", points: 825, icon: "fas fa-sword", color: "#FF6347", description: "The General - Military strategist" },
+            { name: "Amaichar", points: 780, icon: "fas fa-book-reader", color: "#00CED1", description: "The Advisor - Wise counselor" },
+            { name: "Palkarar", points: 735, icon: "fas fa-user-shield", color: "#32CD32", description: "The Guard - Protector of the realm" },
+            { name: "Bandhari", points: 700, icon: "fas fa-coins", color: "#FFD700", description: "The Treasurer - Keeper of wealth" },
+            { name: "Kavalar", points: 645, icon: "fas fa-fort-awesome", color: "#8B4513", description: "The Protector - Guardian of the fort" },
+            { name: "Otturar", points: 590, icon: "fas fa-horse-head", color: "#A0522D", description: "The Messenger - Swift communicator" },
+            { name: "Dhapalkarar", points: 450, icon: "fas fa-door-closed", color: "#4169E1", description: "The Gatekeeper - Controller of entry" },
+            { name: "Dharmakartha", points: 240, icon: "fas fa-balance-scale", color: "#20B2AA", description: "The Judge - Arbiter of justice" }
+        ];
+
+        const coreRoles = ["Raja", "Rani", "Thirudan", "Police"];
+
+        // Initialize particles
+        function initParticles() {
+            const container = document.getElementById('particles');
+            for (let i = 0; i < 50; i++) {
+                const particle = document.createElement('div');
+                particle.className = 'particle';
+                particle.style.left = Math.random() * 100 + 'vw';
+                particle.style.width = Math.random() * 10 + 5 + 'px';
+                particle.style.height = Math.random() * 10 + 5 + 'px';
+                particle.style.animationDelay = Math.random() * 20 + 's';
+                particle.style.opacity = Math.random() * 0.5 + 0.3;
+                container.appendChild(particle);
+            }
+        }
+
+        // Create confetti effect
+        function createConfetti() {
+            const colors = ['#FF6B35', '#8A2BE2', '#FFD700', '#1E90FF', '#32CD32'];
+            for (let i = 0; i < 100; i++) {
+                const confetti = document.createElement('div');
+                confetti.className = 'confetti';
+                confetti.style.left = Math.random() * 100 + 'vw';
+                confetti.style.backgroundColor = colors[Math.floor(Math.random() * colors.length)];
+                confetti.style.transform = `rotate(${Math.random() * 360}deg)`;
+                document.body.appendChild(confetti);
+                
+                const animation = confetti.animate([
+                    { top: '0px', opacity: 1 },
+                    { top: '100vh', opacity: 0 }
+                ], {
+                    duration: Math.random() * 3000 + 2000,
+                    easing: 'cubic-bezier(0.215, 0.610, 0.355, 1)'
+                });
+                
+                animation.onfinish = () => confetti.remove();
+            }
+        }
+
+        // Initialize game
+        function initGame() {
+            initParticles();
+            
+            // Check for existing game in URL
+            const urlParams = new URLSearchParams(window.location.search);
+            const gameCodeFromURL = urlParams.get('code');
+            const playerNameFromURL = urlParams.get('name');
+            
+            if (gameCodeFromURL) {
+                // Auto-join if URL has game code
+                if (playerNameFromURL) {
+                    setTimeout(() => {
+                        document.getElementById('joinCode').value = gameCodeFromURL;
+                        document.getElementById('playerName').value = playerNameFromURL;
+                        joinGame(playerNameFromURL, gameCodeFromURL);
+                    }, 1000);
+                } else {
+                    // Show join modal with code pre-filled
+                    setTimeout(() => {
+                        const modal = new bootstrap.Modal(document.getElementById('joinModal'));
+                        document.getElementById('joinCode').value = gameCodeFromURL;
+                        document.getElementById('playerName').value = `Player${Math.floor(Math.random() * 1000) + 1}`;
+                        modal.show();
+                    }, 1000);
+                }
+            }
+            
+            // Check for saved game
+            const savedCode = localStorage.getItem('rajaRaniGameCode');
+            const savedPlayerId = localStorage.getItem('rajaRaniPlayerId');
+            
+            if (savedCode && savedPlayerId) {
+                // Try to load game
+                loadGameFromServer(savedCode).then(gameData => {
+                    if (gameData && gameData.code === savedCode) {
+                        gameState.code = savedCode;
+                        Object.assign(gameState, gameData);
+                        currentPlayerId = savedPlayerId;
+                        isHost = localStorage.getItem('rajaRaniIsHost') === 'true';
+                        
+                        // Check if player exists
+                        const playerExists = gameState.players.some(p => p.id === currentPlayerId);
+                        if (playerExists) {
+                            startGamePolling();
+                            showGamePage();
+                        } else {
+                            showHomePage();
+                        }
+                    } else {
+                        showHomePage();
+                    }
+                }).catch(() => {
+                    showHomePage();
+                });
+            } else {
+                showHomePage();
+            }
+            
+            updateUI();
+        }
+
+        // Show home page
+        function showHomePage() {
+            document.getElementById('homePage').classList.remove('d-none');
+            document.getElementById('gameContainer').classList.add('d-none');
+            document.body.style.background = 'linear-gradient(135deg, #0c0c0c 0%, #1a1a2e 50%, #16213e 100%)';
+            
+            // Clear polling
+            if (gamePollInterval) {
+                clearInterval(gamePollInterval);
+                gamePollInterval = null;
+            }
+        }
+
+        // Show game page
+        function showGamePage() {
+            document.getElementById('homePage').classList.add('d-none');
+            document.getElementById('gameContainer').classList.remove('d-none');
+            updateUI();
+            
+            // Start polling
+            startGamePolling();
+        }
+
+        // Generate game code
+        function generateGameCode() {
+            const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
+            const length = Math.floor(Math.random() * 2) + 5;
+            let code = '';
+            
+            for (let i = 0; i < length; i++) {
+                code += chars.charAt(Math.floor(Math.random() * chars.length));
+            }
+            
+            createNewGame(code);
+            return code;
+        }
+
+        // Create new game
+        async function createNewGame(code) {
+            gameState.code = code.toUpperCase();
+            currentPlayerId = 'player_' + Date.now() + '_' + Math.random().toString(36).substr(2, 9);
+            isHost = true;
+            gameState.hostId = currentPlayerId;
+            
+            // Initialize game state
+            gameState.players = [{
+                id: currentPlayerId,
+                name: 'Host',
+                role: null,
+                points: 0,
+                isHost: true,
+                joinedAt: Date.now(),
+                lastActive: Date.now()
+            }];
+            
+            gameState.cards = [];
+            gameState.gamePhase = 'waiting';
+            gameState.votes = {};
+            gameState.round = 1;
+            gameState.votingComplete = false;
+            gameState.policeVote = null;
+            gameState.thirudanId = null;
+            gameState.policeId = null;
+            gameState.timestamp = Date.now();
+            gameState.lastSync = Date.now();
+            
+            // Save to localStorage
+            localStorage.setItem('rajaRaniGameCode', gameState.code);
+            localStorage.setItem('rajaRaniPlayerId', currentPlayerId);
+            localStorage.setItem('rajaRaniPlayerName', 'Host');
+            localStorage.setItem('rajaRaniIsHost', 'true');
+            
+            try {
+                // Save to server
+                await saveGameToServer(gameState);
+                
+                // Start polling
+                startGamePolling();
+                
+                // Update UI
+                updateUI();
+                showGamePage();
+                
+                createConfetti();
+                
+                // Create shareable link
+                const shareLink = `${window.location.origin}${window.location.pathname}?code=${gameState.code}`;
+                const shareText = `🎮 Join my Raja Rani game!\n\nGame Code: ${gameState.code}\n\nJoin Link: ${shareLink}\n\nOr enter code manually in the game.`;
+                
+                alert(`🎮 New game created!\n\nGame Code: ${gameState.code}\n\nShare this code with your friends!\n\nOr share this link:\n${shareLink}`);
+                
+                // Copy to clipboard if possible
+                if (navigator.clipboard) {
+                    navigator.clipboard.writeText(shareText).then(() => {
+                        console.log('Game info copied to clipboard');
+                    });
+                }
+                
+            } catch (error) {
+                console.error('Error creating game:', error);
+                alert('Error creating game. Please try again.');
+            }
+        }
+
+        // Save game to server
+        async function saveGameToServer(gameData) {
+            try {
+                // For cross-device multiplayer, we'll use localStorage as a fallback
+                // and also try to use a simple server simulation
+                
+                // Method 1: Use localStorage with a shared key pattern
+                const allGames = JSON.parse(localStorage.getItem('rajaRaniAllGames') || '{}');
+                allGames[gameData.code] = {
+                    ...gameData,
+                    lastUpdated: Date.now()
+                };
+                localStorage.setItem('rajaRaniAllGames', JSON.stringify(allGames));
+                
+                // Method 2: Try to use sessionStorage for cross-tab
+                sessionStorage.setItem('rajaRaniGameUpdate_' + gameData.code, JSON.stringify(gameData));
+                
+                return true;
+            } catch (error) {
+                console.error('Error saving game:', error);
+                throw error;
+            }
+        }
+
+        // Load game from server
+        async function loadGameFromServer(gameCode) {
+            try {
+                // Method 1: Check localStorage for all games
+                const allGames = JSON.parse(localStorage.getItem('rajaRaniAllGames') || '{}');
+                const gameData = allGames[gameCode];
+                
+                if (gameData) {
+                    // Check if game is expired (older than 2 hours)
+                    if (gameData.lastUpdated && Date.now() - gameData.lastUpdated > 7200000) {
+                        delete allGames[gameCode];
+                        localStorage.setItem('rajaRaniAllGames', JSON.stringify(allGames));
+                        return null;
+                    }
+                    
+                    // Clean up inactive players (not active for 60 seconds)
+                    const now = Date.now();
+                    if (gameData.players) {
+                        gameData.players = gameData.players.filter(player => {
+                            return now - player.lastActive < 60000;
+                        });
+                    }
+                    
+                    return gameData;
+                }
+                
+                return null;
+            } catch (error) {
+                console.error('Error loading game:', error);
+                return null;
+            }
+        }
+
+        // Start game polling
+        function startGamePolling() {
+            if (gamePollInterval) {
+                clearInterval(gamePollInterval);
+            }
+            
+            gamePollInterval = setInterval(async () => {
+                if (!gameState.code) {
+                    clearInterval(gamePollInterval);
+                    return;
+                }
+                
+                try {
+                    // Load latest game state
+                    const loadedGame = await loadGameFromServer(gameState.code);
+                    
+                    if (loadedGame && loadedGame.code === gameState.code) {
+                        // Preserve current player's data
+                        const currentPlayer = gameState.players.find(p => p.id === currentPlayerId);
+                        
+                        // Update game state but keep current player
+                        const oldPlayers = gameState.players;
+                        Object.assign(gameState, loadedGame);
+                        
+                        // Ensure current player is in the list
+                        if (currentPlayer && !gameState.players.some(p => p.id === currentPlayerId)) {
+                            gameState.players.push(currentPlayer);
+                        }
+                        
+                        // Update current player's last active time
+                        if (currentPlayer) {
+                            const playerIndex = gameState.players.findIndex(p => p.id === currentPlayerId);
+                            if (playerIndex !== -1) {
+                                gameState.players[playerIndex].lastActive = Date.now();
+                            }
+                        }
+                        
+                        // Sync back to server
+                        await saveGameToServer(gameState);
+                        
+                        // Update UI if something changed
+                        updateUI();
+                    } else if (!loadedGame) {
+                        // Game not found on server
+                        if (isHost) {
+                            // Host should recreate if game disappeared
+                            await saveGameToServer(gameState);
+                        } else {
+                            // Player should check connection
+                            console.log('Game not found on server, trying to reconnect...');
+                        }
+                    }
+                    
+                    // Update connection status
+                    updateConnectionStatus(true);
+                    
+                } catch (error) {
+                    console.error('Error polling game:', error);
+                    updateConnectionStatus(false);
+                }
+            }, 3000); // Poll every 3 seconds
+        }
+
+        // Update connection status
+        function updateConnectionStatus(connected) {
+            const connectionDot = document.getElementById('connectionDot');
+            const connectionStatus = document.getElementById('connectionStatus');
+            
+            if (connected) {
+                connectionDot.className = 'connection-dot online';
+                connectionStatus.textContent = 'Connected';
+            } else {
+                connectionDot.className = 'connection-dot connecting';
+                connectionStatus.textContent = 'Reconnecting...';
+            }
+        }
+
+        // Update UI
+        function updateUI() {
+            // Update game code displays
+            const gameCodeEl = document.getElementById('gameCode');
+            const topGameCodeEl = document.getElementById('gameCodeDisplay');
+            const mobileGameCodeEl = document.getElementById('mobileGameCode');
+            
+            if (gameState.code) {
+                gameCodeEl.textContent = gameState.code;
+                topGameCodeEl.textContent = gameState.code;
+                mobileGameCodeEl.textContent = gameState.code;
+            } else {
+                gameCodeEl.textContent = '-----';
+                topGameCodeEl.textContent = '-----';
+                mobileGameCodeEl.textContent = '-----';
+            }
+            
+            // Update player count
+            document.getElementById('playerCount').textContent = gameState.players.length;
+            document.getElementById('infoPlayerCount').textContent = `${gameState.players.length}/15`;
+            document.getElementById('infoRound').textContent = gameState.round;
+            
+            // Update game phase
+            updateGamePhase();
+            
+            // Render player list
+            renderPlayerList();
+            
+            // Render cards if in card selection phase
+            if (gameState.gamePhase === 'cardSelection') {
+                renderCards();
+            }
+            
+            // Render voting if in voting phase
+            if (gameState.gamePhase === 'voting') {
+                renderVoting();
+            }
+            
+            // Render results if in results phase
+            if (gameState.gamePhase === 'results') {
+                renderResults();
+            }
+            
+            // Render scoreboard
+            renderScoreboard();
+            
+            // Update button states
+            updateButtonStates();
+        }
+
+        // Update game phase
+        function updateGamePhase() {
+            const phaseTitle = document.getElementById('gamePhaseTitle');
+            const phaseDescription = document.getElementById('gamePhaseDescription');
+            const steps = document.querySelectorAll('.phase-indicator');
+            
+            steps.forEach(step => step.classList.remove('active'));
+            
+            switch (gameState.gamePhase) {
+                case 'waiting':
+                    phaseTitle.textContent = 'Game Setup';
+                    phaseDescription.textContent = 'Create or join a game to begin the adventure';
+                    document.getElementById('step1').classList.add('active');
+                    document.getElementById('setupArea').classList.remove('d-none');
+                    document.getElementById('cardSelectionSection').classList.add('d-none');
+                    document.getElementById('votingSection').classList.add('d-none');
+                    document.getElementById('roundResultsSection').classList.add('d-none');
+                    break;
+                    
+                case 'cardSelection':
+                    phaseTitle.textContent = 'Choose Your Role';
+                    phaseDescription.textContent = 'Select a card to reveal your secret identity';
+                    document.getElementById('step2').classList.add('active');
+                    document.getElementById('setupArea').classList.add('d-none');
+                    document.getElementById('cardSelectionSection').classList.remove('d-none');
+                    document.getElementById('votingSection').classList.add('d-none');
+                    document.getElementById('roundResultsSection').classList.add('d-none');
+                    break;
+                    
+                case 'voting':
+                    phaseTitle.textContent = 'Find the Thirudan';
+                    phaseDescription.textContent = 'Only Police can identify the thief';
+                    document.getElementById('step3').classList.add('active');
+                    document.getElementById('setupArea').classList.add('d-none');
+                    document.getElementById('cardSelectionSection').classList.add('d-none');
+                    document.getElementById('votingSection').classList.remove('d-none');
+                    document.getElementById('roundResultsSection').classList.add('d-none');
+                    break;
+                    
+                case 'results':
+                    phaseTitle.textContent = 'Round Results';
+                    phaseDescription.textContent = 'See who won the round';
+                    document.getElementById('step4').classList.add('active');
+                    document.getElementById('setupArea').classList.add('d-none');
+                    document.getElementById('cardSelectionSection').classList.add('d-none');
+                    document.getElementById('votingSection').classList.add('d-none');
+                    document.getElementById('roundResultsSection').classList.remove('d-none');
+                    break;
+            }
+        }
+
+        // Render player list
+        function renderPlayerList() {
+            const playersList = document.getElementById('playersList');
+            playersList.innerHTML = '';
+            
+            gameState.players.forEach((player, index) => {
+                const col = document.createElement('div');
+                col.className = 'col-6 col-md-4 col-lg-3';
+                
+                const roleDef = player.role ? roleDefinitions.find(r => r.name === player.role) : null;
+                const roleColor = roleDef ? roleDef.color : '#666';
+                const roleIcon = roleDef ? roleDef.icon : 'fas fa-user';
+                
+                // Check if current player is Police
+                const isPolice = player.role === 'Police';
+                const isCurrentPlayer = player.id === currentPlayerId;
+                const isHostPlayer = player.isHost || player.id === gameState.hostId;
+                
+                col.innerHTML = `
+                    <div class="player-card text-center animate__animated animate__fadeInUp" style="animation-delay: ${index * 0.1}s">
+                        ${isPolice ? '<div class="police-badge"><i class="fas fa-shield-alt me-1"></i>POLICE</div>' : ''}
+                        ${isHostPlayer ? '<div class="host-badge"><i class="fas fa-crown me-1"></i>HOST</div>' : ''}
+                        
+                        <div class="player-avatar mb-3" style="border-color: ${roleColor}">
+                            <i class="${roleIcon}"></i>
+                        </div>
+                        <h6 class="fw-bold mb-1">${player.name} ${isCurrentPlayer ? '<span class="badge bg-info ms-1">You</span>' : ''}</h6>
+                        <div class="player-points text-warning mb-2">${gameState.gamePhase === 'results' || gameState.gamePhase === 'ended' ? player.points : '?'}</div>
+                        <div class="player-role">${gameState.gamePhase === 'results' || gameState.gamePhase === 'ended' ? (player.role || 'Hidden') : 'Hidden'}</div>
+                    </div>
+                `;
+                
+                playersList.appendChild(col);
+            });
+            
+            // Add empty slots
+            for (let i = gameState.players.length; i < 15; i++) {
+                const col = document.createElement('div');
+                col.className = 'col-6 col-md-4 col-lg-3';
+                col.innerHTML = `
+                    <div class="player-card text-center" style="opacity: 0.5">
+                        <div class="player-avatar mb-3">
+                            <i class="fas fa-user-plus"></i>
+                        </div>
+                        <h6 class="fw-bold mb-1">Waiting...</h6>
+                        <div class="player-points text-warning mb-2">-</div>
+                        <div class="player-role">---</div>
+                    </div>
+                `;
+                playersList.appendChild(col);
+            }
+        }
+
+        // Render cards
+        function renderCards() {
+            const cardsGrid = document.getElementById('cardsGrid');
+            cardsGrid.innerHTML = '';
+            
+            if (gameState.cards.length < gameState.players.length) {
+                gameState.cards = new Array(gameState.players.length).fill(null);
+            }
+            
+            const currentPlayer = gameState.players.find(p => p.id === currentPlayerId);
+            const hasCurrentPlayerCard = currentPlayer && currentPlayer.role !== null;
+            
+            gameState.players.forEach((player, index) => {
+                const cardData = gameState.cards[index];
+                const isTaken = cardData && cardData.playerId;
+                const isCurrentPlayerCard = isTaken && cardData.playerId === currentPlayerId;
+                
+                const col = document.createElement('div');
+                col.className = 'col-6 col-md-4 col-lg-3 mb-4';
+                
+                let cardHTML = '';
+                
+                if (isCurrentPlayerCard) {
+                    // Show revealed card for current player
+                    const roleDef = roleDefinitions.find(r => r.name === cardData.role);
+                    cardHTML = `
+                        <div class="card-3d flipped">
+                            <div class="card-face card-back">
+                                <i class="fas fa-question card-icon"></i>
+                                <div>Tap to reveal</div>
+                            </div>
+                            <div class="card-face card-front" style="border-color: ${roleDef.color}">
+                                <i class="${roleDef.icon} card-icon" style="color: ${roleDef.color}"></i>
+                                <div class="fw-bold mb-2">${cardData.role}</div>
+                                <div class="card-points">${cardData.points}</div>
+                                <small class="text-light">${player.name}</small>
+                            </div>
+                        </div>
+                    `;
+                } else if (isTaken && hasCurrentPlayerCard) {
+                    // Show locked card if current player already has a card
+                    cardHTML = `
+                        <div class="card-3d locked" style="opacity: 0.7">
+                            <div class="card-face card-back">
+                                <i class="fas fa-lock card-icon"></i>
+                                <div>Already Taken</div>
+                            </div>
+                            <div class="card-face card-front">
+                                <i class="fas fa-user-secret card-icon"></i>
+                                <div class="fw-bold mb-2">Taken</div>
+                                <div class="card-points">???</div>
+                                <small class="text-light">Another player</small>
+                            </div>
+                        </div>
+                    `;
+                } else if (!isTaken && !hasCurrentPlayerCard) {
+                    // Show available card
+                    cardHTML = `
+                        <div class="card-3d" onclick="selectCard(${index})">
+                            <div class="card-face card-back">
+                                <i class="fas fa-question card-icon"></i>
+                                <div>Tap to reveal</div>
+                            </div>
+                            <div class="card-face card-front">
+                                <i class="fas fa-user-secret card-icon"></i>
+                                <div class="fw-bold mb-2">Mystery Role</div>
+                                <div class="card-points">???</div>
+                                <small class="text-light">Available</small>
+                            </div>
+                        </div>
+                    `;
+                } else {
+                    // Show empty card
+                    cardHTML = `
+                        <div class="card-3d" style="opacity: 0.5">
+                            <div class="card-face card-back">
+                                <i class="fas fa-user card-icon"></i>
+                                <div>${player.name}</div>
+                            </div>
+                            <div class="card-face card-front">
+                                <i class="fas fa-user card-icon"></i>
+                                <div class="fw-bold mb-2">${player.name}</div>
+                                <div class="card-points">?</div>
+                                <small class="text-light">No card yet</small>
+                            </div>
+                        </div>
+                    `;
+                }
+                
+                col.innerHTML = cardHTML;
+                cardsGrid.appendChild(col);
+            });
+        }
+
+        // Render voting
+        function renderVoting() {
+            const votingGrid = document.getElementById('votingGrid');
+            votingGrid.innerHTML = '';
+            
+            const currentPlayer = gameState.players.find(p => p.id === currentPlayerId);
+            const votingInstruction = document.getElementById('votingInstruction');
+            
+            if (currentPlayer && currentPlayer.role === 'Police') {
+                votingInstruction.innerHTML = `
+                    <span class="text-warning fw-bold">🔍 You are the Police!</span> Find and vote for the Thirudan.
+                    <div class="small text-light mt-1">Click on a player to vote for them</div>
+                `;
+            } else {
+                votingInstruction.innerHTML = `
+                    👀 Watch carefully as the Police tries to find the Thirudan.
+                    <div class="small text-light mt-1">Only Police can vote</div>
+                `;
+            }
+            
+            gameState.players.forEach((player, index) => {
+                if (player.id === currentPlayerId) return;
+                
+                const isVoted = gameState.votes[currentPlayerId] === player.id;
+                
+                const col = document.createElement('div');
+                col.className = 'col-6 col-md-4 col-lg-3 mb-4';
+                
+                col.innerHTML = `
+                    <div class="player-card text-center ${isVoted ? 'border-warning border-3' : ''}" 
+                         onclick="${currentPlayer && currentPlayer.role === 'Police' ? `selectVote('${player.id}')` : ''}"
+                         style="cursor: ${currentPlayer && currentPlayer.role === 'Police' ? 'pointer' : 'default'}; transform: ${isVoted ? 'scale(1.05)' : 'scale(1)'}">
+                        <div class="player-avatar mb-3 ${isVoted ? 'animate__animated animate__pulse animate__infinite' : ''}">
+                            <i class="fas fa-user"></i>
+                        </div>
+                        <h6 class="fw-bold mb-1">${player.name}</h6>
+                        <div class="player-points text-warning mb-2">?</div>
+                        <div class="player-role">?</div>
+                        ${isVoted ? '<div class="badge bg-warning mt-2"><i class="fas fa-vote-yea me-1"></i>Voted</div>' : ''}
+                    </div>
+                `;
+                
+                votingGrid.appendChild(col);
+            });
+        }
+
+        // Render results
+        function renderResults() {
+            const resultsGrid = document.getElementById('roundResultsGrid');
+            resultsGrid.innerHTML = '';
+            
+            const sortedPlayers = [...gameState.players].sort((a, b) => b.points - a.points);
+            
+            sortedPlayers.forEach((player, index) => {
+                const roleDef = player.role ? roleDefinitions.find(r => r.name === player.role) : null;
+                const roleColor = roleDef ? roleDef.color : '#666';
+                const roleIcon = roleDef ? roleDef.icon : 'fas fa-user';
+                
+                const col = document.createElement('div');
+                col.className = 'col-6 col-md-4 col-lg-3 mb-4';
+                
+                col.innerHTML = `
+                    <div class="player-card text-center ${index < 3 ? 'border-warning border-3' : ''}">
+                        <div class="player-avatar mb-3" style="border-color: ${roleColor}">
+                            <i class="${roleIcon}"></i>
+                        </div>
+                        <h6 class="fw-bold mb-1">${player.name}</h6>
+                        <div class="player-points text-warning mb-2">${player.points}</div>
+                        <div class="player-role">${player.role || 'Unknown'}</div>
+                    </div>
+                `;
+                
+                resultsGrid.appendChild(col);
+            });
+        }
+
+        // Render scoreboard
+        function renderScoreboard() {
+            const scoreTable = document.getElementById('scoreTable');
+            scoreTable.innerHTML = '';
+            
+            const sortedPlayers = [...gameState.players].sort((a, b) => b.points - a.points);
+            
+            sortedPlayers.forEach((player, index) => {
+                const roleDef = player.role ? roleDefinitions.find(r => r.name === player.role) : null;
+                const roleColor = roleDef ? roleDef.color : '#666';
+                
+                const row = document.createElement('tr');
+                row.className = 'score-row animate__animated animate__fadeIn';
+                row.style.animationDelay = `${index * 0.1}s`;
+                
+                row.innerHTML = `
+                    <td>
+                        <div class="rank-badge ${index === 0 ? 'rank-1' : index === 1 ? 'rank-2' : index === 2 ? 'rank-3' : 'bg-secondary'}">
+                            ${index + 1}
+                        </div>
+                    </td>
+                    <td class="fw-bold">${player.name} ${player.isHost || player.id === gameState.hostId ? '<i class="fas fa-crown text-warning ms-1"></i>' : ''} ${player.role === 'Police' ? '<i class="fas fa-shield-alt text-info ms-1"></i>' : ''}</td>
+                    <td class="text-warning fw-bold">${player.points}</td>
+                    <td style="color: ${roleColor}">${player.role || '-'}</td>
+                `;
+                
+                scoreTable.appendChild(row);
+            });
+        }
+
+        // Select card
+        async function selectCard(cardIndex) {
+            if (gameState.gamePhase !== 'cardSelection') return;
+            
+            const currentPlayer = gameState.players.find(p => p.id === currentPlayerId);
+            if (!currentPlayer) return;
+            
+            // Check if already has card
+            const hasCard = gameState.cards.some(c => c && c.playerId === currentPlayerId);
+            if (hasCard) {
+                alert('You already selected a card!');
+                return;
+            }
+            
+            // Check if card is taken
+            if (gameState.cards[cardIndex] && gameState.cards[cardIndex].playerId) {
+                alert('This card is already taken!');
+                return;
+            }
+            
+            // Determine role
+            const takenCards = gameState.cards.filter(c => c && c.playerId).length;
+            let assignedRole;
+            
+            if (takenCards < 4) {
+                const takenRoles = gameState.cards
+                    .filter(c => c && coreRoles.includes(c.role))
+                    .map(c => c.role);
+                const availableRoles = coreRoles.filter(role => !takenRoles.includes(role));
+                const roleName = availableRoles[Math.floor(Math.random() * availableRoles.length)];
+                assignedRole = roleDefinitions.find(r => r.name === roleName);
+            } else {
+                const takenRoles = gameState.cards
+                    .filter(c => c && c.role)
+                    .map(c => c.role);
+                const availableRoles = roleDefinitions.filter(role => !takenRoles.includes(role.name));
+                if (availableRoles.length === 0) {
+                    assignedRole = roleDefinitions[Math.floor(Math.random() * roleDefinitions.length)];
+                } else {
+                    assignedRole = availableRoles[Math.floor(Math.random() * availableRoles.length)];
+                }
+            }
+            
+            // Assign role
+            gameState.cards[cardIndex] = {
+                role: assignedRole.name,
+                points: assignedRole.points,
+                playerId: currentPlayerId
+            };
+            
+            // Update player
+            const playerIndex = gameState.players.findIndex(p => p.id === currentPlayerId);
+            gameState.players[playerIndex].role = assignedRole.name;
+            gameState.players[playerIndex].points = assignedRole.points;
+            
+            if (assignedRole.name === "Thirudan") gameState.thirudanId = currentPlayerId;
+            if (assignedRole.name === "Police") gameState.policeId = currentPlayerId;
+            
+            // Update timestamp
+            gameState.timestamp = Date.now();
+            gameState.lastSync = Date.now();
+            
+            // Save to server
+            await saveGameToServer(gameState);
+            
+            // Show role reveal
+            showRoleReveal(assignedRole);
+            updateUI();
+        }
+
+        // Show role reveal
+        function showRoleReveal(role) {
+            document.getElementById('roleIcon').className = role.icon + ' ' + `role-${role.name.toLowerCase()}`;
+            document.getElementById('roleIcon').style.color = role.color;
+            document.getElementById('roleName').textContent = role.name;
+            document.getElementById('rolePoints').textContent = `${role.points} POINTS`;
+            document.getElementById('roleDescription').textContent = role.description;
+            
+            const modal = new bootstrap.Modal(document.getElementById('roleRevealModal'));
+            modal.show();
+            
+            createConfetti();
+        }
+
+        // Select vote
+        async function selectVote(playerId) {
+            const currentPlayer = gameState.players.find(p => p.id === currentPlayerId);
+            if (!currentPlayer || currentPlayer.role !== 'Police') {
+                alert('Only Police can vote!');
+                return;
+            }
+            
+            if (playerId === currentPlayerId) {
+                alert("You cannot vote for yourself!");
+                return;
+            }
+            
+            gameState.votes[currentPlayerId] = playerId;
+            gameState.policeVote = playerId;
+            gameState.timestamp = Date.now();
+            gameState.lastSync = Date.now();
+            
+            await saveGameToServer(gameState);
+            updateUI();
+        }
+
+        // Start game
+        async function startGame() {
+            const currentPlayer = gameState.players.find(p => p.id === currentPlayerId);
+            if (!currentPlayer || !(currentPlayer.isHost || currentPlayer.id === gameState.hostId)) {
+                alert('Only the host can start the game!');
+                return;
+            }
+            
+            if (gameState.players.length < 4) {
+                alert(`Need at least 4 players to start! Currently have ${gameState.players.length} players.`);
+                return;
+            }
+            
+            gameState.gamePhase = 'cardSelection';
+            gameState.cards = new Array(gameState.players.length).fill(null);
+            gameState.policeVote = null;
+            gameState.thirudanId = null;
+            gameState.policeId = null;
+            gameState.votes = {};
+            gameState.timestamp = Date.now();
+            gameState.lastSync = Date.now();
+            
+            await saveGameToServer(gameState);
+            updateUI();
+            
+            createConfetti();
+            alert('🎮 Game started! Everyone choose your cards!');
+        }
+
+        // Continue to voting - ONLY POLICE CAN CLICK THIS
+        async function continueToVoting() {
+            const currentPlayer = gameState.players.find(p => p.id === currentPlayerId);
+            
+            // Check if current player is Police
+            if (!currentPlayer || currentPlayer.role !== 'Police') {
+                alert('Only Police can continue to voting phase!');
+                return;
+            }
+            
+            // Check if all players have selected cards
+            const playersWithCards = gameState.players.filter(p => p.role !== null).length;
+            if (playersWithCards < gameState.players.length) {
+                alert(`Not all players have selected cards yet! ${playersWithCards}/${gameState.players.length} players have cards.`);
+                return;
+            }
+            
+            gameState.gamePhase = 'voting';
+            gameState.votes = {};
+            gameState.policeVote = null;
+            gameState.timestamp = Date.now();
+            gameState.lastSync = Date.now();
+            
+            await saveGameToServer(gameState);
+            updateUI();
+            
+            alert('🔍 Voting phase started! Police, find the Thirudan!');
+        }
+
+        // Show voting results - ALL PLAYERS CAN CLICK THIS
+        async function showVotingResults() {
+            // Check if Police has voted
+            if (gameState.policeVote === null) {
+                alert('Police has not voted yet!');
+                return;
+            }
+            
+            gameState.gamePhase = 'results';
+            const policeCorrect = gameState.policeVote === gameState.thirudanId;
+            
+            // Update points
+            gameState.players.forEach(player => {
+                if (player.id === gameState.policeId) {
+                    player.points += policeCorrect ? 100 : 0;
+                } else if (player.id === gameState.thirudanId) {
+                    player.points += policeCorrect ? 0 : 100;
+                }
+            });
+            
+            // Update result message
+            const thirudanPlayer = gameState.players.find(p => p.id === gameState.thirudanId);
+            const thirudanName = thirudanPlayer ? thirudanPlayer.name : 'Thirudan';
+            const policePlayer = gameState.players.find(p => p.id === gameState.policeId);
+            const policeName = policePlayer ? policePlayer.name : 'Police';
+            
+            const roundResult = document.getElementById('roundResult');
+            if (policeCorrect) {
+                roundResult.innerHTML = `
+                    <div class="alert alert-success">
+                        <i class="fas fa-check-circle me-2"></i>
+                        Police (<strong>${policeName}</strong>) correctly identified <strong>${thirudanName}</strong> as the Thirudan!
+                        <div class="mt-2">+100 points to Police!</div>
+                    </div>
+                `;
+            } else {
+                roundResult.innerHTML = `
+                    <div class="alert alert-danger">
+                        <i class="fas fa-times-circle me-2"></i>
+                        Police (<strong>${policeName}</strong>) failed to identify <strong>${thirudanName}</strong> as the Thirudan!
+                        <div class="mt-2">+100 points to Thirudan!</div>
+                    </div>
+                `;
+            }
+            
+            gameState.timestamp = Date.now();
+            gameState.lastSync = Date.now();
+            
+            await saveGameToServer(gameState);
+            updateUI();
+            createConfetti();
+        }
+
+        // Next round - HOST ONLY
+        async function nextRound() {
+            const currentPlayer = gameState.players.find(p => p.id === currentPlayerId);
+            if (!currentPlayer || !(currentPlayer.isHost || currentPlayer.id === gameState.hostId)) {
+                alert('Only the host can start next round!');
+                return;
+            }
+            
+            gameState.round++;
+            gameState.cards = new Array(gameState.players.length).fill(null);
+            gameState.votes = {};
+            gameState.policeVote = null;
+            gameState.thirudanId = null;
+            gameState.policeId = null;
+            
+            gameState.players.forEach(player => {
+                player.role = null;
+            });
+            
+            gameState.gamePhase = 'cardSelection';
+            gameState.timestamp = Date.now();
+            gameState.lastSync = Date.now();
+            document.getElementById('currentRound').textContent = gameState.round;
+            
+            await saveGameToServer(gameState);
+            updateUI();
+            
+            alert(`🔄 Round ${gameState.round} started! New roles for everyone!`);
+        }
+
+        // End game - HOST ONLY
+        async function endGame() {
+            const currentPlayer = gameState.players.find(p => p.id === currentPlayerId);
+            if (!currentPlayer || !(currentPlayer.isHost || currentPlayer.id === gameState.hostId)) {
+                alert('Only the host can end the game!');
+                return;
+            }
+            
+            if (confirm('Are you sure you want to end the game for all players?')) {
+                // Remove game from server
+                const allGames = JSON.parse(localStorage.getItem('rajaRaniAllGames') || '{}');
+                delete allGames[gameState.code];
+                localStorage.setItem('rajaRaniAllGames', JSON.stringify(allGames));
+                
+                leaveGame();
+                alert('Game ended! Returning to home page.');
+            }
+        }
+
+        // Join game
+        async function joinGame(name, code) {
+            if (!name.trim()) {
+                alert('Please enter your name!');
+                return false;
+            }
+            
+            if (!code || code.length < 5) {
+                alert('Please enter a valid 5-6 character game code!');
+                return false;
+            }
+            
+            const gameCode = code.toUpperCase();
+            
+            try {
+                // Check if game exists
+                const gameData = await loadGameFromServer(gameCode);
+                
+                if (!gameData) {
+                    alert('Game not found! Please check the game code.\n\nMake sure:\n1. The host created the game\n2. You entered the code correctly\n3. The game hasn\'t expired');
+                    return false;
+                }
+                
+                // Set game state
+                gameState.code = gameCode;
+                Object.assign(gameState, gameData);
+                
+                // Check if name already exists
+                const nameExists = gameState.players.some(p => p.name.toLowerCase() === name.toLowerCase());
+                if (nameExists) {
+                    alert(`Name "${name}" is already taken in this game. Please use a different name.`);
+                    return false;
+                }
+                
+                // Check if game is full
+                if (gameState.players.length >= 15) {
+                    alert('Game is full! Maximum 15 players allowed.');
+                    return false;
+                }
+                
+                // Create new player
+                currentPlayerId = 'player_' + Date.now() + '_' + Math.random().toString(36).substr(2, 9);
+                isHost = false;
+                
+                const player = {
+                    id: currentPlayerId,
+                    name: name.trim(),
+                    role: null,
+                    points: 0,
+                    isHost: false,
+                    joinedAt: Date.now(),
+                    lastActive: Date.now()
+                };
+                
+                gameState.players.push(player);
+                
+                // Save player info
+                localStorage.setItem('rajaRaniGameCode', gameState.code);
+                localStorage.setItem('rajaRaniPlayerId', currentPlayerId);
+                localStorage.setItem('rajaRaniPlayerName', name.trim());
+                localStorage.setItem('rajaRaniIsHost', 'false');
+                
+                // Update game on server
+                gameState.timestamp = Date.now();
+                gameState.lastSync = Date.now();
+                await saveGameToServer(gameState);
+                
+                // Start polling
+                startGamePolling();
+                
+                // Update UI and show game page
+                updateUI();
+                showGamePage();
+                
+                alert(`✅ Welcome to the game, ${name}!\n\nGame: ${gameState.code}\nPlayers: ${gameState.players.length}/15\n\nWaiting for host to start...`);
+                
+                const modal = bootstrap.Modal.getInstance(document.getElementById('joinModal'));
+                if (modal) {
+                    modal.hide();
+                }
+                
+                // Update URL with game code for easy sharing
+                const newUrl = new URL(window.location);
+                newUrl.searchParams.set('code', gameCode);
+                newUrl.searchParams.set('name', name.trim());
+                window.history.replaceState({}, '', newUrl);
+                
+                return true;
+                
+            } catch (error) {
+                console.error('Error joining game:', error);
+                alert('Error joining game. Please try again.');
+                return false;
+            }
+        }
+
+        // Leave game
+        function leaveGame() {
+            // Remove player from game state
+            const playerIndex = gameState.players.findIndex(p => p.id === currentPlayerId);
+            if (playerIndex !== -1 && gameState.code) {
+                gameState.players.splice(playerIndex, 1);
+                
+                // Update the game state if there are still players
+                if (gameState.players.length > 0) {
+                    saveGameToServer(gameState).catch(console.error);
+                } else {
+                    // No players left, clean up game
+                    const allGames = JSON.parse(localStorage.getItem('rajaRaniAllGames') || '{}');
+                    delete allGames[gameState.code];
+                    localStorage.setItem('rajaRaniAllGames', JSON.stringify(allGames));
+                }
+            }
+            
+            // Clear player-specific data
+            localStorage.removeItem('rajaRaniGameCode');
+            localStorage.removeItem('rajaRaniPlayerId');
+            localStorage.removeItem('rajaRaniPlayerName');
+            localStorage.removeItem('rajaRaniIsHost');
+            
+            // Clear polling
+            if (gamePollInterval) {
+                clearInterval(gamePollInterval);
+                gamePollInterval = null;
+            }
+            
+            // Reset state
+            currentPlayerId = null;
+            isHost = false;
+            gameState.code = null;
+            gameState.players = [];
+            
+            // Clear URL parameters
+            const newUrl = new URL(window.location);
+            newUrl.searchParams.delete('code');
+            newUrl.searchParams.delete('name');
+            window.history.replaceState({}, '', newUrl);
+            
+            // Show home page
+            showHomePage();
+        }
+
+        // Update button states
+        function updateButtonStates() {
+            const currentPlayer = gameState.players.find(p => p.id === currentPlayerId);
+            const isHostPlayer = currentPlayer && (currentPlayer.isHost || currentPlayer.id === gameState.hostId);
+            const isPolice = currentPlayer && currentPlayer.role === 'Police';
+            
+            // Start game button - HOST ONLY
+            const startGameBtn = document.getElementById('startGameBtn');
+            if (isHostPlayer && gameState.players.length >= 4 && gameState.gamePhase === 'waiting') {
+                startGameBtn.disabled = false;
+                startGameBtn.classList.remove('btn-secondary');
+                startGameBtn.classList.add('btn-success');
+                document.getElementById('startGameDescription').textContent = 'Ready to start the game!';
+            } else {
+                startGameBtn.disabled = true;
+                startGameBtn.classList.remove('btn-success');
+                startGameBtn.classList.add('btn-secondary');
+            }
+            
+            // Continue to voting button - POLICE ONLY
+            const continueToVotingBtn = document.getElementById('continueToVotingBtn');
+            const allCardsSelected = gameState.cards.filter(c => c && c.playerId).length >= gameState.players.length;
+            
+            if (gameState.gamePhase === 'cardSelection') {
+                if (isPolice) {
+                    continueToVotingBtn.disabled = !allCardsSelected;
+                    continueToVotingBtn.style.display = 'block';
+                    continueToVotingBtn.innerHTML = '<i class="fas fa-shield-alt me-2"></i>CONTINUE TO VOTING (POLICE ONLY)';
+                    continueToVotingBtn.classList.remove('btn-warning');
+                    continueToVotingBtn.classList.add('btn-info');
+                } else {
+                    continueToVotingBtn.style.display = 'none';
+                }
+                
+                // Update cards status
+                const cardsSelected = gameState.cards.filter(c => c && c.playerId).length;
+                const cardsStatus = document.getElementById('cardsStatus');
+                if (allCardsSelected) {
+                    cardsStatus.innerHTML = `<span class="text-success">✅ All players have selected cards!</span><br><small class="text-light">Police can continue to voting</small>`;
+                } else {
+                    cardsStatus.innerHTML = `<span class="text-warning">${cardsSelected}/${gameState.players.length} players selected cards</span><br><small class="text-light">Waiting for all players to choose...</small>`;
+                }
+            } else {
+                continueToVotingBtn.style.display = 'none';
+            }
+            
+            // Submit vote button - POLICE ONLY
+            const submitVoteBtn = document.getElementById('submitVoteBtn');
+            submitVoteBtn.disabled = !isPolice || gameState.policeVote !== null;
+            
+            // Show results button - AVAILABLE TO ALL PLAYERS
+            const showResultsBtn = document.getElementById('showResultsBtn');
+            const policeVoted = gameState.policeVote !== null;
+            
+            if (gameState.gamePhase === 'voting') {
+                showResultsBtn.disabled = !policeVoted;
+                if (policeVoted) {
+                    showResultsBtn.innerHTML = '<i class="fas fa-eye me-2"></i>SHOW RESULTS (ALL PLAYERS)';
+                    showResultsBtn.classList.remove('btn-warning');
+                    showResultsBtn.classList.add('btn-success');
+                } else {
+                    showResultsBtn.innerHTML = '<i class="fas fa-forward me-2"></i>SHOW RESULTS';
+                    showResultsBtn.classList.remove('btn-success');
+                    showResultsBtn.classList.add('btn-warning');
+                }
+            }
+            
+            // Next round and End game buttons - HOST ONLY
+            const nextRoundBtn = document.getElementById('nextRoundBtn');
+            const endGameBtn = document.getElementById('endGameBtn');
+            
+            if (gameState.gamePhase === 'results') {
+                if (isHostPlayer) {
+                    nextRoundBtn.disabled = false;
+                    endGameBtn.disabled = false;
+                } else {
+                    nextRoundBtn.disabled = true;
+                    endGameBtn.disabled = true;
+                    nextRoundBtn.innerHTML = '<i class="fas fa-user-crown me-2"></i>HOST ONLY';
+                    endGameBtn.innerHTML = '<i class="fas fa-user-crown me-2"></i>HOST ONLY';
+                    nextRoundBtn.classList.remove('btn-success');
+                    endGameBtn.classList.remove('btn-danger');
+                    nextRoundBtn.classList.add('btn-secondary');
+                    endGameBtn.classList.add('btn-secondary');
+                }
+            }
+        }
+
+        // Event Listeners
+        document.addEventListener('DOMContentLoaded', function() {
+            initGame();
+            
+            // Button event listeners
+            document.getElementById('createGameBtn').addEventListener('click', generateGameCode);
+            
+            document.getElementById('joinExistingGameBtn').addEventListener('click', () => {
+                const modal = new bootstrap.Modal(document.getElementById('joinModal'));
+                document.getElementById('joinCode').value = '';
+                document.getElementById('playerName').value = `Player${Math.floor(Math.random() * 1000) + 1}`;
+                modal.show();
+            });
+            
+            document.getElementById('joinGameBtn').addEventListener('click', () => {
+                const modal = new bootstrap.Modal(document.getElementById('joinModal'));
+                const codeInput = document.getElementById('joinCode');
+                const nameInput = document.getElementById('playerName');
+                
+                codeInput.value = gameState.code || '';
+                nameInput.value = `Player${Math.floor(Math.random() * 1000) + 1}`;
+                modal.show();
+            });
+            
+            document.getElementById('homeInstructionsBtn').addEventListener('click', () => {
+                const modal = new bootstrap.Modal(document.getElementById('instructionsModal'));
+                modal.show();
+            });
+            
+            document.getElementById('closeGameBtn').addEventListener('click', () => {
+                if (confirm('Are you sure you want to leave the game?')) {
+                    leaveGame();
+                }
+            });
+            
+            document.getElementById('showScoreboardBtn').addEventListener('click', () => {
+                alert('Scoreboard is already visible on the right side!');
+            });
+            
+            document.getElementById('showInstructionsBtn').addEventListener('click', () => {
+                const modal = new bootstrap.Modal(document.getElementById('instructionsModal'));
+                modal.show();
+            });
+            
+            document.getElementById('startGameBtn').addEventListener('click', startGame);
+            document.getElementById('continueToVotingBtn').addEventListener('click', continueToVoting);
+            document.getElementById('submitVoteBtn').addEventListener('click', () => {
+                if (gameState.policeVote) {
+                    alert('Vote submitted! Click "Show Results" to see the outcome.');
+                } else {
+                    alert('Please select a player to vote for first!');
+                }
+            });
+            
+            document.getElementById('clearVoteBtn').addEventListener('click', () => {
+                delete gameState.votes[currentPlayerId];
+                gameState.policeVote = null;
+                saveGameToServer(gameState);
+                updateUI();
+            });
+            
+            document.getElementById('showResultsBtn').addEventListener('click', showVotingResults);
+            document.getElementById('nextRoundBtn').addEventListener('click', nextRound);
+            document.getElementById('endGameBtn').addEventListener('click', endGame);
+            document.getElementById('copyCodeBtn').addEventListener('click', () => {
+                if (gameState.code) {
+                    navigator.clipboard.writeText(gameState.code).then(() => {
+                        alert('Game code copied to clipboard!');
+                    }).catch(err => {
+                        console.error('Failed to copy: ', err);
+                        alert('Failed to copy code. Please copy manually: ' + gameState.code);
+                    });
+                }
+            });
+            
+            document.getElementById('generateCodeBtn').addEventListener('click', generateGameCode);
+            
+            // Join form submission
+            document.getElementById('joinForm').addEventListener('submit', function(e) {
+                e.preventDefault();
+                const name = document.getElementById('playerName').value.trim();
+                let code = document.getElementById('joinCode').value.trim().toUpperCase();
+                
+                if (!name) {
+                    alert('Please enter your name!');
+                    return;
+                }
+                
+                if (!code || code.length < 5) {
+                    alert('Please enter a valid game code (5-6 characters)!');
+                    return;
+                }
+                
+                const success = joinGame(name, code);
+                if (success) {
+                    const modal = bootstrap.Modal.getInstance(document.getElementById('joinModal'));
+                    modal.hide();
+                }
+            });
+            
+            // Auto-fill player name
+            document.getElementById('playerName').value = `Player${Math.floor(Math.random() * 1000) + 1}`;
+        });
+    </script>
+</body>
+</html>
