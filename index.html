@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -1178,866 +1179,1341 @@
     <!-- Bootstrap JS -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"></script>
     
-  <script>
-    // Game state
-    const gameState = {
-        code: null,
-        players: [],
-        cards: [],
-        gamePhase: 'waiting',
-        votes: {},
-        round: 1,
-        votingComplete: false,
-        policeVote: null,
-        thirudanId: null,
-        policeId: null,
-        timestamp: Date.now(),
-        hostId: null,
-        lastSync: Date.now()
-    };
+    <script>
+        // Game state
+        const gameState = {
+            code: null,
+            players: [],
+            cards: [],
+            gamePhase: 'waiting',
+            votes: {},
+            round: 1,
+            votingComplete: false,
+            policeVote: null,
+            thirudanId: null,
+            policeId: null,
+            timestamp: Date.now(),
+            hostId: null,
+            lastSync: Date.now()
+        };
 
-    let currentPlayerId = null;
-    let selectedVote = null;
-    let isHost = false;
-    
-    // WebRTC P2P Connections
-    let peer = null;
-    let hostConnection = null;
-    let connections = {}; // For host: connections to all players
-    let myPeerId = null;
-    
-    // Role definitions
-    const roleDefinitions = [
-        { name: "Raja", points: 1000, icon: "fas fa-crown", color: "#FFD700", description: "The King - Supreme ruler with highest authority" },
-        { name: "Rani", points: 500, icon: "fas fa-gem", color: "#FF69B4", description: "The Queen - Royal majesty and power" },
-        { name: "Thirudan", points: 0, icon: "fas fa-user-secret", color: "#32CD32", description: "The Thief - Master of stealth and deception" },
-        { name: "Police", points: 100, icon: "fas fa-shield-alt", color: "#1E90FF", description: "The Police - Protector and investigator" },
-        { name: "Mandhiri", points: 900, icon: "fas fa-landmark", color: "#9B30FF", description: "The Minister - Advisor to the throne" },
-        { name: "Senapathi", points: 860, icon: "fas fa-helmet-battle", color: "#FF4500", description: "The Commander - Leader of the army" },
-        { name: "Thalapathi", points: 825, icon: "fas fa-sword", color: "#FF6347", description: "The General - Military strategist" },
-        { name: "Amaichar", points: 780, icon: "fas fa-book-reader", color: "#00CED1", description: "The Advisor - Wise counselor" },
-        { name: "Palkarar", points: 735, icon: "fas fa-user-shield", color: "#32CD32", description: "The Guard - Protector of the realm" },
-        { name: "Bandhari", points: 700, icon: "fas fa-coins", color: "#FFD700", description: "The Treasurer - Keeper of wealth" },
-        { name: "Kavalar", points: 645, icon: "fas fa-fort-awesome", color: "#8B4513", description: "The Protector - Guardian of the fort" },
-        { name: "Otturar", points: 590, icon: "fas fa-horse-head", color: "#A0522D", description: "The Messenger - Swift communicator" },
-        { name: "Dhapalkarar", points: 450, icon: "fas fa-door-closed", color: "#4169E1", description: "The Gatekeeper - Controller of entry" },
-        { name: "Dharmakartha", points: 240, icon: "fas fa-balance-scale", color: "#20B2AA", description: "The Judge - Arbiter of justice" }
-    ];
+        let currentPlayerId = null;
+        let selectedVote = null;
+        let isHost = false;
+        let gamePollInterval = null;
+        let serverURL = 'https://jsonblob.com/api/jsonBlob';
 
-    const coreRoles = ["Raja", "Rani", "Thirudan", "Police"];
+        // Role definitions
+        const roleDefinitions = [
+            { name: "Raja", points: 1000, icon: "fas fa-crown", color: "#FFD700", description: "The King - Supreme ruler with highest authority" },
+            { name: "Rani", points: 500, icon: "fas fa-gem", color: "#FF69B4", description: "The Queen - Royal majesty and power" },
+            { name: "Thirudan", points: 0, icon: "fas fa-user-secret", color: "#32CD32", description: "The Thief - Master of stealth and deception" },
+            { name: "Police", points: 100, icon: "fas fa-shield-alt", color: "#1E90FF", description: "The Police - Protector and investigator" },
+            { name: "Mandhiri", points: 900, icon: "fas fa-landmark", color: "#9B30FF", description: "The Minister - Advisor to the throne" },
+            { name: "Senapathi", points: 860, icon: "fas fa-helmet-battle", color: "#FF4500", description: "The Commander - Leader of the army" },
+            { name: "Thalapathi", points: 825, icon: "fas fa-sword", color: "#FF6347", description: "The General - Military strategist" },
+            { name: "Amaichar", points: 780, icon: "fas fa-book-reader", color: "#00CED1", description: "The Advisor - Wise counselor" },
+            { name: "Palkarar", points: 735, icon: "fas fa-user-shield", color: "#32CD32", description: "The Guard - Protector of the realm" },
+            { name: "Bandhari", points: 700, icon: "fas fa-coins", color: "#FFD700", description: "The Treasurer - Keeper of wealth" },
+            { name: "Kavalar", points: 645, icon: "fas fa-fort-awesome", color: "#8B4513", description: "The Protector - Guardian of the fort" },
+            { name: "Otturar", points: 590, icon: "fas fa-horse-head", color: "#A0522D", description: "The Messenger - Swift communicator" },
+            { name: "Dhapalkarar", points: 450, icon: "fas fa-door-closed", color: "#4169E1", description: "The Gatekeeper - Controller of entry" },
+            { name: "Dharmakartha", points: 240, icon: "fas fa-balance-scale", color: "#20B2AA", description: "The Judge - Arbiter of justice" }
+        ];
 
-    // Initialize particles
-    function initParticles() {
-        const container = document.getElementById('particles');
-        for (let i = 0; i < 50; i++) {
-            const particle = document.createElement('div');
-            particle.className = 'particle';
-            particle.style.left = Math.random() * 100 + 'vw';
-            particle.style.width = Math.random() * 10 + 5 + 'px';
-            particle.style.height = Math.random() * 10 + 5 + 'px';
-            particle.style.animationDelay = Math.random() * 20 + 's';
-            particle.style.opacity = Math.random() * 0.5 + 0.3;
-            container.appendChild(particle);
-        }
-    }
+        const coreRoles = ["Raja", "Rani", "Thirudan", "Police"];
 
-    // Create confetti effect
-    function createConfetti() {
-        const colors = ['#FF6B35', '#8A2BE2', '#FFD700', '#1E90FF', '#32CD32'];
-        for (let i = 0; i < 100; i++) {
-            const confetti = document.createElement('div');
-            confetti.className = 'confetti';
-            confetti.style.left = Math.random() * 100 + 'vw';
-            confetti.style.backgroundColor = colors[Math.floor(Math.random() * colors.length)];
-            confetti.style.transform = `rotate(${Math.random() * 360}deg)`;
-            document.body.appendChild(confetti);
-            
-            const animation = confetti.animate([
-                { top: '0px', opacity: 1 },
-                { top: '100vh', opacity: 0 }
-            ], {
-                duration: Math.random() * 3000 + 2000,
-                easing: 'cubic-bezier(0.215, 0.610, 0.355, 1)'
-            });
-            
-            animation.onfinish = () => confetti.remove();
-        }
-    }
-
-    // Initialize game
-    function initGame() {
-        initParticles();
-        
-        // Check for existing game in URL
-        const urlParams = new URLSearchParams(window.location.search);
-        const gameCodeFromURL = urlParams.get('code');
-        const playerNameFromURL = urlParams.get('name');
-        const peerIdFromURL = urlParams.get('peer');
-        
-        if (gameCodeFromURL) {
-            // Auto-join if URL has game code and host peer ID
-            if (playerNameFromURL && peerIdFromURL) {
-                setTimeout(() => {
-                    document.getElementById('joinCode').value = gameCodeFromURL;
-                    document.getElementById('playerName').value = playerNameFromURL;
-                    // Store host peer ID for connection
-                    sessionStorage.setItem('hostPeerId', peerIdFromURL);
-                    joinGame(playerNameFromURL, gameCodeFromURL);
-                }, 1000);
-            } else if (playerNameFromURL) {
-                // Just game code and name
-                setTimeout(() => {
-                    document.getElementById('joinCode').value = gameCodeFromURL;
-                    document.getElementById('playerName').value = playerNameFromURL;
-                    joinGame(playerNameFromURL, gameCodeFromURL);
-                }, 1000);
-            } else {
-                // Show join modal with code pre-filled
-                setTimeout(() => {
-                    const modal = new bootstrap.Modal(document.getElementById('joinModal'));
-                    document.getElementById('joinCode').value = gameCodeFromURL;
-                    document.getElementById('playerName').value = `Player${Math.floor(Math.random() * 1000) + 1}`;
-                    modal.show();
-                }, 1000);
+        // Initialize particles
+        function initParticles() {
+            const container = document.getElementById('particles');
+            for (let i = 0; i < 50; i++) {
+                const particle = document.createElement('div');
+                particle.className = 'particle';
+                particle.style.left = Math.random() * 100 + 'vw';
+                particle.style.width = Math.random() * 10 + 5 + 'px';
+                particle.style.height = Math.random() * 10 + 5 + 'px';
+                particle.style.animationDelay = Math.random() * 20 + 's';
+                particle.style.opacity = Math.random() * 0.5 + 0.3;
+                container.appendChild(particle);
             }
         }
-        
-        updateUI();
-    }
 
-    // Initialize WebRTC Peer
-    function initializePeer() {
-        try {
-            // Generate a unique peer ID
-            myPeerId = 'player_' + Date.now() + '_' + Math.random().toString(36).substr(2, 9);
-            
-            // For testing, use PeerJS cloud server (free)
-            peer = new Peer(myPeerId, {
-                host: '0.peerjs.com',
-                port: 443,
-                path: '/',
-                debug: 3,
-                config: {
-                    'iceServers': [
-                        { url: 'stun:stun.l.google.com:19302' },
-                        { url: 'stun:global.stun.twilio.com:3478' }
-                    ]
-                }
-            });
-            
-            peer.on('open', function(id) {
-                console.log('My peer ID is: ' + id);
-                updateConnectionStatus(true);
+        // Create confetti effect
+        function createConfetti() {
+            const colors = ['#FF6B35', '#8A2BE2', '#FFD700', '#1E90FF', '#32CD32'];
+            for (let i = 0; i < 100; i++) {
+                const confetti = document.createElement('div');
+                confetti.className = 'confetti';
+                confetti.style.left = Math.random() * 100 + 'vw';
+                confetti.style.backgroundColor = colors[Math.floor(Math.random() * colors.length)];
+                confetti.style.transform = `rotate(${Math.random() * 360}deg)`;
+                document.body.appendChild(confetti);
                 
-                if (isHost) {
-                    // Host: Listen for incoming connections
-                    peer.on('connection', function(conn) {
-                        console.log('Player connected:', conn.peer);
-                        
-                        conn.on('open', function() {
-                            // Add to connections list
-                            connections[conn.peer] = conn;
-                            
-                            // Send current game state to new player
-                            conn.send({
-                                type: 'gameState',
-                                data: gameState
-                            });
-                            
-                            // Listen for messages from player
-                            conn.on('data', function(data) {
-                                handlePeerMessage(data, conn.peer);
-                            });
-                            
-                            conn.on('close', function() {
-                                console.log('Player disconnected:', conn.peer);
-                                delete connections[conn.peer];
-                                // Remove player from game
-                                removePlayer(conn.peer);
-                            });
-                        });
-                    });
+                const animation = confetti.animate([
+                    { top: '0px', opacity: 1 },
+                    { top: '100vh', opacity: 0 }
+                ], {
+                    duration: Math.random() * 3000 + 2000,
+                    easing: 'cubic-bezier(0.215, 0.610, 0.355, 1)'
+                });
+                
+                animation.onfinish = () => confetti.remove();
+            }
+        }
+
+        // Initialize game
+        function initGame() {
+            initParticles();
+            
+            // Check for existing game in URL
+            const urlParams = new URLSearchParams(window.location.search);
+            const gameCodeFromURL = urlParams.get('code');
+            const playerNameFromURL = urlParams.get('name');
+            
+            if (gameCodeFromURL) {
+                // Auto-join if URL has game code
+                if (playerNameFromURL) {
+                    setTimeout(() => {
+                        document.getElementById('joinCode').value = gameCodeFromURL;
+                        document.getElementById('playerName').value = playerNameFromURL;
+                        joinGame(playerNameFromURL, gameCodeFromURL);
+                    }, 1000);
                 } else {
-                    // Player: Try to connect to host
-                    const hostPeerId = sessionStorage.getItem('hostPeerId');
-                    if (hostPeerId && gameState.code) {
-                        connectToHost(hostPeerId);
-                    }
+                    // Show join modal with code pre-filled
+                    setTimeout(() => {
+                        const modal = new bootstrap.Modal(document.getElementById('joinModal'));
+                        document.getElementById('joinCode').value = gameCodeFromURL;
+                        document.getElementById('playerName').value = `Player${Math.floor(Math.random() * 1000) + 1}`;
+                        modal.show();
+                    }, 1000);
                 }
-            });
-            
-            peer.on('error', function(err) {
-                console.error('PeerJS error:', err);
-                updateConnectionStatus(false);
-                
-                // Fallback to manual mode
-                if (isHost) {
-                    alert('⚠️ P2P connection failed. Using manual mode.\n\nPlayers will need to refresh manually to see updates.');
-                }
-            });
-            
-        } catch (error) {
-            console.error('Failed to initialize PeerJS:', error);
-            // Fallback to manual refresh mode
-            alert('⚠️ Peer-to-peer connection not available. Using manual refresh mode.');
-            updateConnectionStatus(false);
-        }
-    }
-
-    // Connect to host (for players)
-    function connectToHost(hostPeerId) {
-        try {
-            hostConnection = peer.connect(hostPeerId, {
-                reliable: true
-            });
-            
-            hostConnection.on('open', function() {
-                console.log('Connected to host:', hostPeerId);
-                updateConnectionStatus(true);
-                
-                // Send join request
-                hostConnection.send({
-                    type: 'join',
-                    playerId: currentPlayerId,
-                    playerName: localStorage.getItem('rajaRaniPlayerName'),
-                    gameCode: gameState.code
-                });
-                
-                // Listen for messages from host
-                hostConnection.on('data', function(data) {
-                    handlePeerMessage(data, hostPeerId);
-                });
-                
-                hostConnection.on('close', function() {
-                    console.log('Disconnected from host');
-                    updateConnectionStatus(false);
-                    alert('Disconnected from host. Please refresh and rejoin.');
-                });
-            });
-            
-            hostConnection.on('error', function(err) {
-                console.error('Connection error:', err);
-                updateConnectionStatus(false);
-            });
-            
-        } catch (error) {
-            console.error('Failed to connect to host:', error);
-            updateConnectionStatus(false);
-        }
-    }
-
-    // Handle messages from peers
-    function handlePeerMessage(data, peerId) {
-        console.log('Received message from', peerId, ':', data);
-        
-        switch (data.type) {
-            case 'gameState':
-                // Update local game state
-                Object.assign(gameState, data.data);
-                updateUI();
-                break;
-                
-            case 'playerJoined':
-                // Add new player to game
-                if (!gameState.players.some(p => p.id === data.playerId)) {
-                    gameState.players.push({
-                        id: data.playerId,
-                        name: data.playerName,
-                        role: null,
-                        points: 0,
-                        isHost: false,
-                        joinedAt: Date.now(),
-                        lastActive: Date.now()
-                    });
-                    updateUI();
-                }
-                break;
-                
-            case 'playerLeft':
-                // Remove player from game
-                gameState.players = gameState.players.filter(p => p.id !== data.playerId);
-                updateUI();
-                break;
-                
-            case 'gameUpdate':
-                // Update specific game data
-                if (data.property && data.value !== undefined) {
-                    gameState[data.property] = data.value;
-                    updateUI();
-                }
-                break;
-                
-            case 'syncRequest':
-                // Send full game state
-                if (isHost && connections[peerId]) {
-                    connections[peerId].send({
-                        type: 'gameState',
-                        data: gameState
-                    });
-                }
-                break;
-        }
-    }
-
-    // Broadcast game state to all players (host only)
-    function broadcastGameState() {
-        if (!isHost) return;
-        
-        for (const peerId in connections) {
-            try {
-                connections[peerId].send({
-                    type: 'gameState',
-                    data: gameState
-                });
-            } catch (error) {
-                console.error('Failed to send to', peerId, ':', error);
             }
-        }
-    }
-
-    // Send update to host (player only)
-    function sendUpdateToHost(updateType, data) {
-        if (isHost || !hostConnection) return;
-        
-        try {
-            hostConnection.send({
-                type: updateType,
-                ...data
-            });
-        } catch (error) {
-            console.error('Failed to send update to host:', error);
-        }
-    }
-
-    // Remove player from game
-    function removePlayer(peerId) {
-        // Find player by peer ID
-        const player = gameState.players.find(p => p.id === peerId);
-        if (player) {
-            gameState.players = gameState.players.filter(p => p.id !== peerId);
             
-            if (isHost) {
-                // Notify other players
-                for (const otherPeerId in connections) {
-                    if (otherPeerId !== peerId) {
-                        try {
-                            connections[otherPeerId].send({
-                                type: 'playerLeft',
-                                playerId: peerId
-                            });
-                        } catch (error) {
-                            console.error('Failed to notify player left:', error);
+            // Check for saved game
+            const savedCode = localStorage.getItem('rajaRaniGameCode');
+            const savedPlayerId = localStorage.getItem('rajaRaniPlayerId');
+            
+            if (savedCode && savedPlayerId) {
+                // Try to load game
+                loadGameFromServer(savedCode).then(gameData => {
+                    if (gameData && gameData.code === savedCode) {
+                        gameState.code = savedCode;
+                        Object.assign(gameState, gameData);
+                        currentPlayerId = savedPlayerId;
+                        isHost = localStorage.getItem('rajaRaniIsHost') === 'true';
+                        
+                        // Check if player exists
+                        const playerExists = gameState.players.some(p => p.id === currentPlayerId);
+                        if (playerExists) {
+                            startGamePolling();
+                            showGamePage();
+                        } else {
+                            showHomePage();
                         }
+                    } else {
+                        showHomePage();
                     }
-                }
+                }).catch(() => {
+                    showHomePage();
+                });
+            } else {
+                showHomePage();
             }
             
             updateUI();
         }
-    }
 
-    // Update connection status
-    function updateConnectionStatus(connected) {
-        const connectionDot = document.getElementById('connectionDot');
-        const connectionStatus = document.getElementById('connectionStatus');
-        
-        if (connected) {
-            connectionDot.className = 'connection-dot online';
-            connectionStatus.textContent = 'Connected';
-        } else {
-            connectionDot.className = 'connection-dot offline';
-            connectionStatus.textContent = 'Disconnected';
+        // Show home page
+        function showHomePage() {
+            document.getElementById('homePage').classList.remove('d-none');
+            document.getElementById('gameContainer').classList.add('d-none');
+            document.body.style.background = 'linear-gradient(135deg, #0c0c0c 0%, #1a1a2e 50%, #16213e 100%)';
+            
+            // Clear polling
+            if (gamePollInterval) {
+                clearInterval(gamePollInterval);
+                gamePollInterval = null;
+            }
         }
-    }
 
-    // Show home page
-    function showHomePage() {
-        document.getElementById('homePage').classList.remove('d-none');
-        document.getElementById('gameContainer').classList.add('d-none');
-        document.body.style.background = 'linear-gradient(135deg, #0c0c0c 0%, #1a1a2e 50%, #16213e 100%)';
-    }
-
-    // Show game page
-    function showGamePage() {
-        document.getElementById('homePage').classList.add('d-none');
-        document.getElementById('gameContainer').classList.remove('d-none');
-        updateUI();
-        
-        // Initialize WebRTC connection
-        setTimeout(initializePeer, 1000);
-    }
-
-    // Generate game code
-    function generateGameCode() {
-        const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
-        const length = Math.floor(Math.random() * 2) + 5;
-        let code = '';
-        
-        for (let i = 0; i < length; i++) {
-            code += chars.charAt(Math.floor(Math.random() * chars.length));
-        }
-        
-        createNewGame(code);
-        return code;
-    }
-
-    // Create new game
-    async function createNewGame(code) {
-        gameState.code = code.toUpperCase();
-        currentPlayerId = 'player_' + Date.now() + '_' + Math.random().toString(36).substr(2, 9);
-        isHost = true;
-        gameState.hostId = currentPlayerId;
-        
-        // Initialize game state
-        gameState.players = [{
-            id: currentPlayerId,
-            name: 'Host',
-            role: null,
-            points: 0,
-            isHost: true,
-            joinedAt: Date.now(),
-            lastActive: Date.now()
-        }];
-        
-        gameState.cards = [];
-        gameState.gamePhase = 'waiting';
-        gameState.votes = {};
-        gameState.round = 1;
-        gameState.votingComplete = false;
-        gameState.policeVote = null;
-        gameState.thirudanId = null;
-        gameState.policeId = null;
-        gameState.timestamp = Date.now();
-        gameState.lastSync = Date.now();
-        
-        // Save to localStorage
-        localStorage.setItem('rajaRaniGameCode', gameState.code);
-        localStorage.setItem('rajaRaniPlayerId', currentPlayerId);
-        localStorage.setItem('rajaRaniPlayerName', 'Host');
-        localStorage.setItem('rajaRaniIsHost', 'true');
-        
-        try {
-            // Update UI
+        // Show game page
+        function showGamePage() {
+            document.getElementById('homePage').classList.add('d-none');
+            document.getElementById('gameContainer').classList.remove('d-none');
             updateUI();
-            showGamePage();
             
-            createConfetti();
-            
-            // Create shareable link with host's peer ID
-            // (Peer ID will be added after PeerJS initializes)
-            setTimeout(() => {
-                if (myPeerId) {
-                    const shareLink = `${window.location.origin}${window.location.pathname}?code=${gameState.code}&peer=${myPeerId}`;
-                    
-                    const instructions = `
-                        🎮 NEW GAME CREATED! 🎮
-                        
-                        Game Code: ${gameState.code}
-                        
-                        📱 SHARE THIS LINK WITH PLAYERS:
-                        
-                        ${shareLink}
-                        
-                        Players just need to:
-                        1. Open this link on their device
-                        2. Enter their name
-                        3. Click "Join Game"
-                        
-                        ⚠️ Make sure all players are on the same Wi-Fi network
-                    `;
-                    
-                    alert(instructions);
-                    
-                    // Copy to clipboard
-                    if (navigator.clipboard) {
-                        navigator.clipboard.writeText(`Join my Raja Rani game!\n\nGame Code: ${gameState.code}\n\nJoin Link: ${shareLink}`);
-                    }
-                }
-            }, 2000); // Wait for PeerJS to initialize
-            
-        } catch (error) {
-            console.error('Error creating game:', error);
-            alert('Error creating game. Please try again.');
+            // Start polling
+            startGamePolling();
         }
-    }
 
-    // Join game
-    async function joinGame(name, code) {
-        if (!name.trim()) {
-            alert('Please enter your name!');
-            return false;
-        }
-        
-        if (!code || code.length < 5) {
-            alert('Please enter a valid 5-6 character game code!');
-            return false;
-        }
-        
-        const gameCode = code.toUpperCase();
-        
-        try {
-            // Create player ID
-            currentPlayerId = 'player_' + Date.now() + '_' + Math.random().toString(36).substr(2, 9);
-            isHost = false;
+        // Generate game code
+        function generateGameCode() {
+            const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
+            const length = Math.floor(Math.random() * 2) + 5;
+            let code = '';
             
-            // Set initial game state
-            gameState.code = gameCode;
+            for (let i = 0; i < length; i++) {
+                code += chars.charAt(Math.floor(Math.random() * chars.length));
+            }
+            
+            createNewGame(code);
+            return code;
+        }
+
+        // Create new game
+        async function createNewGame(code) {
+            gameState.code = code.toUpperCase();
+            currentPlayerId = 'player_' + Date.now() + '_' + Math.random().toString(36).substr(2, 9);
+            isHost = true;
+            gameState.hostId = currentPlayerId;
+            
+            // Initialize game state
             gameState.players = [{
                 id: currentPlayerId,
-                name: name.trim(),
+                name: 'Host',
                 role: null,
                 points: 0,
-                isHost: false,
+                isHost: true,
                 joinedAt: Date.now(),
                 lastActive: Date.now()
             }];
             
-            // Save player info
+            gameState.cards = [];
+            gameState.gamePhase = 'waiting';
+            gameState.votes = {};
+            gameState.round = 1;
+            gameState.votingComplete = false;
+            gameState.policeVote = null;
+            gameState.thirudanId = null;
+            gameState.policeId = null;
+            gameState.timestamp = Date.now();
+            gameState.lastSync = Date.now();
+            
+            // Save to localStorage
             localStorage.setItem('rajaRaniGameCode', gameState.code);
             localStorage.setItem('rajaRaniPlayerId', currentPlayerId);
-            localStorage.setItem('rajaRaniPlayerName', name.trim());
-            localStorage.setItem('rajaRaniIsHost', 'false');
+            localStorage.setItem('rajaRaniPlayerName', 'Host');
+            localStorage.setItem('rajaRaniIsHost', 'true');
             
-            // Update UI and show game page
-            updateUI();
-            showGamePage();
-            
-            // Get host peer ID from URL
-            const urlParams = new URLSearchParams(window.location.search);
-            const hostPeerId = urlParams.get('peer');
-            
-            if (hostPeerId) {
-                alert(`✅ Welcome ${name}!\n\nGame: ${gameState.code}\n\nConnecting to host...`);
-                // PeerJS will handle connection in initializePeer()
-            } else {
-                alert(`✅ Welcome ${name}!\n\nGame: ${gameState.code}\n\n⚠️ Direct connection not available.\nPlease wait for host to start the game.\n\nRefresh page to check for updates.`);
+            try {
+                // Save to server
+                await saveGameToServer(gameState);
+                
+                // Start polling
+                startGamePolling();
+                
+                // Update UI
+                updateUI();
+                showGamePage();
+                
+                createConfetti();
+                
+                // Create shareable link
+                const shareLink = `${window.location.origin}${window.location.pathname}?code=${gameState.code}`;
+                const shareText = `🎮 Join my Raja Rani game!\n\nGame Code: ${gameState.code}\n\nJoin Link: ${shareLink}\n\nOr enter code manually in the game.`;
+                
+                alert(`🎮 New game created!\n\nGame Code: ${gameState.code}\n\nShare this code with your friends!\n\nOr share this link:\n${shareLink}`);
+                
+                // Copy to clipboard if possible
+                if (navigator.clipboard) {
+                    navigator.clipboard.writeText(shareText).then(() => {
+                        console.log('Game info copied to clipboard');
+                    });
+                }
+                
+            } catch (error) {
+                console.error('Error creating game:', error);
+                alert('Error creating game. Please try again.');
             }
-            
-            const modal = bootstrap.Modal.getInstance(document.getElementById('joinModal'));
-            if (modal) {
-                modal.hide();
-            }
-            
-            // Update URL
-            const newUrl = new URL(window.location);
-            newUrl.searchParams.set('code', gameCode);
-            newUrl.searchParams.set('name', name.trim());
-            window.history.replaceState({}, '', newUrl);
-            
-            return true;
-            
-        } catch (error) {
-            console.error('Error joining game:', error);
-            alert('Error joining game. Please try again.');
-            return false;
         }
-    }
 
-    // Update UI
-    function updateUI() {
-        // Update game code displays
-        const gameCodeEl = document.getElementById('gameCode');
-        const topGameCodeEl = document.getElementById('gameCodeDisplay');
-        const mobileGameCodeEl = document.getElementById('mobileGameCode');
-        
-        if (gameState.code) {
-            gameCodeEl.textContent = gameState.code;
-            topGameCodeEl.textContent = gameState.code;
-            mobileGameCodeEl.textContent = gameState.code;
-        } else {
-            gameCodeEl.textContent = '-----';
-            topGameCodeEl.textContent = '-----';
-            mobileGameCodeEl.textContent = '-----';
+        // Save game to server
+        async function saveGameToServer(gameData) {
+            try {
+                // For cross-device multiplayer, we'll use localStorage as a fallback
+                // and also try to use a simple server simulation
+                
+                // Method 1: Use localStorage with a shared key pattern
+                const allGames = JSON.parse(localStorage.getItem('rajaRaniAllGames') || '{}');
+                allGames[gameData.code] = {
+                    ...gameData,
+                    lastUpdated: Date.now()
+                };
+                localStorage.setItem('rajaRaniAllGames', JSON.stringify(allGames));
+                
+                // Method 2: Try to use sessionStorage for cross-tab
+                sessionStorage.setItem('rajaRaniGameUpdate_' + gameData.code, JSON.stringify(gameData));
+                
+                return true;
+            } catch (error) {
+                console.error('Error saving game:', error);
+                throw error;
+            }
         }
-        
-        // Update player count
-        document.getElementById('playerCount').textContent = gameState.players.length;
-        document.getElementById('infoPlayerCount').textContent = `${gameState.players.length}/15`;
-        document.getElementById('infoRound').textContent = gameState.round;
-        
+
+        // Load game from server
+        async function loadGameFromServer(gameCode) {
+            try {
+                // Method 1: Check localStorage for all games
+                const allGames = JSON.parse(localStorage.getItem('rajaRaniAllGames') || '{}');
+                const gameData = allGames[gameCode];
+                
+                if (gameData) {
+                    // Check if game is expired (older than 2 hours)
+                    if (gameData.lastUpdated && Date.now() - gameData.lastUpdated > 7200000) {
+                        delete allGames[gameCode];
+                        localStorage.setItem('rajaRaniAllGames', JSON.stringify(allGames));
+                        return null;
+                    }
+                    
+                    // Clean up inactive players (not active for 60 seconds)
+                    const now = Date.now();
+                    if (gameData.players) {
+                        gameData.players = gameData.players.filter(player => {
+                            return now - player.lastActive < 60000;
+                        });
+                    }
+                    
+                    return gameData;
+                }
+                
+                return null;
+            } catch (error) {
+                console.error('Error loading game:', error);
+                return null;
+            }
+        }
+
+        // Start game polling
+        function startGamePolling() {
+            if (gamePollInterval) {
+                clearInterval(gamePollInterval);
+            }
+            
+            gamePollInterval = setInterval(async () => {
+                if (!gameState.code) {
+                    clearInterval(gamePollInterval);
+                    return;
+                }
+                
+                try {
+                    // Load latest game state
+                    const loadedGame = await loadGameFromServer(gameState.code);
+                    
+                    if (loadedGame && loadedGame.code === gameState.code) {
+                        // Preserve current player's data
+                        const currentPlayer = gameState.players.find(p => p.id === currentPlayerId);
+                        
+                        // Update game state but keep current player
+                        const oldPlayers = gameState.players;
+                        Object.assign(gameState, loadedGame);
+                        
+                        // Ensure current player is in the list
+                        if (currentPlayer && !gameState.players.some(p => p.id === currentPlayerId)) {
+                            gameState.players.push(currentPlayer);
+                        }
+                        
+                        // Update current player's last active time
+                        if (currentPlayer) {
+                            const playerIndex = gameState.players.findIndex(p => p.id === currentPlayerId);
+                            if (playerIndex !== -1) {
+                                gameState.players[playerIndex].lastActive = Date.now();
+                            }
+                        }
+                        
+                        // Sync back to server
+                        await saveGameToServer(gameState);
+                        
+                        // Update UI if something changed
+                        updateUI();
+                    } else if (!loadedGame) {
+                        // Game not found on server
+                        if (isHost) {
+                            // Host should recreate if game disappeared
+                            await saveGameToServer(gameState);
+                        } else {
+                            // Player should check connection
+                            console.log('Game not found on server, trying to reconnect...');
+                        }
+                    }
+                    
+                    // Update connection status
+                    updateConnectionStatus(true);
+                    
+                } catch (error) {
+                    console.error('Error polling game:', error);
+                    updateConnectionStatus(false);
+                }
+            }, 3000); // Poll every 3 seconds
+        }
+
+        // Update connection status
+        function updateConnectionStatus(connected) {
+            const connectionDot = document.getElementById('connectionDot');
+            const connectionStatus = document.getElementById('connectionStatus');
+            
+            if (connected) {
+                connectionDot.className = 'connection-dot online';
+                connectionStatus.textContent = 'Connected';
+            } else {
+                connectionDot.className = 'connection-dot connecting';
+                connectionStatus.textContent = 'Reconnecting...';
+            }
+        }
+
+        // Update UI
+        function updateUI() {
+            // Update game code displays
+            const gameCodeEl = document.getElementById('gameCode');
+            const topGameCodeEl = document.getElementById('gameCodeDisplay');
+            const mobileGameCodeEl = document.getElementById('mobileGameCode');
+            
+            if (gameState.code) {
+                gameCodeEl.textContent = gameState.code;
+                topGameCodeEl.textContent = gameState.code;
+                mobileGameCodeEl.textContent = gameState.code;
+            } else {
+                gameCodeEl.textContent = '-----';
+                topGameCodeEl.textContent = '-----';
+                mobileGameCodeEl.textContent = '-----';
+            }
+            
+            // Update player count
+            document.getElementById('playerCount').textContent = gameState.players.length;
+            document.getElementById('infoPlayerCount').textContent = `${gameState.players.length}/15`;
+            document.getElementById('infoRound').textContent = gameState.round;
+            
+            // Update game phase
+            updateGamePhase();
+            
+            // Render player list
+            renderPlayerList();
+            
+            // Render cards if in card selection phase
+            if (gameState.gamePhase === 'cardSelection') {
+                renderCards();
+            }
+            
+            // Render voting if in voting phase
+            if (gameState.gamePhase === 'voting') {
+                renderVoting();
+            }
+            
+            // Render results if in results phase
+            if (gameState.gamePhase === 'results') {
+                renderResults();
+            }
+            
+            // Render scoreboard
+            renderScoreboard();
+            
+            // Update button states
+            updateButtonStates();
+        }
+
         // Update game phase
-        updateGamePhase();
-        
-        // Render player list
-        renderPlayerList();
-        
-        // Render cards if in card selection phase
-        if (gameState.gamePhase === 'cardSelection') {
-            renderCards();
-        }
-        
-        // Render voting if in voting phase
-        if (gameState.gamePhase === 'voting') {
-            renderVoting();
-        }
-        
-        // Render results if in results phase
-        if (gameState.gamePhase === 'results') {
-            renderResults();
-        }
-        
-        // Render scoreboard
-        renderScoreboard();
-        
-        // Update button states
-        updateButtonStates();
-    }
-
-    // Rest of your UI functions remain the same (updateGamePhase, renderPlayerList, etc.)
-    // ... [Keep all your existing render functions exactly as they were] ...
-
-    // Select card
-    async function selectCard(cardIndex) {
-        if (gameState.gamePhase !== 'cardSelection') return;
-        
-        const currentPlayer = gameState.players.find(p => p.id === currentPlayerId);
-        if (!currentPlayer) return;
-        
-        // Check if already has card
-        const hasCard = gameState.cards.some(c => c && c.playerId === currentPlayerId);
-        if (hasCard) {
-            alert('You already selected a card!');
-            return;
-        }
-        
-        // Check if card is taken
-        if (gameState.cards[cardIndex] && gameState.cards[cardIndex].playerId) {
-            alert('This card is already taken!');
-            return;
-        }
-        
-        // Determine role
-        const takenCards = gameState.cards.filter(c => c && c.playerId).length;
-        let assignedRole;
-        
-        if (takenCards < 4) {
-            const takenRoles = gameState.cards
-                .filter(c => c && coreRoles.includes(c.role))
-                .map(c => c.role);
-            const availableRoles = coreRoles.filter(role => !takenRoles.includes(role));
-            const roleName = availableRoles[Math.floor(Math.random() * availableRoles.length)];
-            assignedRole = roleDefinitions.find(r => r.name === roleName);
-        } else {
-            const takenRoles = gameState.cards
-                .filter(c => c && c.role)
-                .map(c => c.role);
-            const availableRoles = roleDefinitions.filter(role => !takenRoles.includes(role.name));
-            if (availableRoles.length === 0) {
-                assignedRole = roleDefinitions[Math.floor(Math.random() * roleDefinitions.length)];
-            } else {
-                assignedRole = availableRoles[Math.floor(Math.random() * availableRoles.length)];
+        function updateGamePhase() {
+            const phaseTitle = document.getElementById('gamePhaseTitle');
+            const phaseDescription = document.getElementById('gamePhaseDescription');
+            const steps = document.querySelectorAll('.phase-indicator');
+            
+            steps.forEach(step => step.classList.remove('active'));
+            
+            switch (gameState.gamePhase) {
+                case 'waiting':
+                    phaseTitle.textContent = 'Game Setup';
+                    phaseDescription.textContent = 'Create or join a game to begin the adventure';
+                    document.getElementById('step1').classList.add('active');
+                    document.getElementById('setupArea').classList.remove('d-none');
+                    document.getElementById('cardSelectionSection').classList.add('d-none');
+                    document.getElementById('votingSection').classList.add('d-none');
+                    document.getElementById('roundResultsSection').classList.add('d-none');
+                    break;
+                    
+                case 'cardSelection':
+                    phaseTitle.textContent = 'Choose Your Role';
+                    phaseDescription.textContent = 'Select a card to reveal your secret identity';
+                    document.getElementById('step2').classList.add('active');
+                    document.getElementById('setupArea').classList.add('d-none');
+                    document.getElementById('cardSelectionSection').classList.remove('d-none');
+                    document.getElementById('votingSection').classList.add('d-none');
+                    document.getElementById('roundResultsSection').classList.add('d-none');
+                    break;
+                    
+                case 'voting':
+                    phaseTitle.textContent = 'Find the Thirudan';
+                    phaseDescription.textContent = 'Only Police can identify the thief';
+                    document.getElementById('step3').classList.add('active');
+                    document.getElementById('setupArea').classList.add('d-none');
+                    document.getElementById('cardSelectionSection').classList.add('d-none');
+                    document.getElementById('votingSection').classList.remove('d-none');
+                    document.getElementById('roundResultsSection').classList.add('d-none');
+                    break;
+                    
+                case 'results':
+                    phaseTitle.textContent = 'Round Results';
+                    phaseDescription.textContent = 'See who won the round';
+                    document.getElementById('step4').classList.add('active');
+                    document.getElementById('setupArea').classList.add('d-none');
+                    document.getElementById('cardSelectionSection').classList.add('d-none');
+                    document.getElementById('votingSection').classList.add('d-none');
+                    document.getElementById('roundResultsSection').classList.remove('d-none');
+                    break;
             }
         }
-        
-        // Assign role
-        gameState.cards[cardIndex] = {
-            role: assignedRole.name,
-            points: assignedRole.points,
-            playerId: currentPlayerId
-        };
-        
-        // Update player
-        const playerIndex = gameState.players.findIndex(p => p.id === currentPlayerId);
-        gameState.players[playerIndex].role = assignedRole.name;
-        gameState.players[playerIndex].points = assignedRole.points;
-        
-        if (assignedRole.name === "Thirudan") gameState.thirudanId = currentPlayerId;
-        if (assignedRole.name === "Police") gameState.policeId = currentPlayerId;
-        
-        // Update timestamp
-        gameState.timestamp = Date.now();
-        gameState.lastSync = Date.now();
-        
-        // Broadcast update if host
-        if (isHost) {
-            broadcastGameState();
-        } else {
-            sendUpdateToHost('gameUpdate', {
-                property: 'cards',
-                value: gameState.cards
+
+        // Render player list
+        function renderPlayerList() {
+            const playersList = document.getElementById('playersList');
+            playersList.innerHTML = '';
+            
+            gameState.players.forEach((player, index) => {
+                const col = document.createElement('div');
+                col.className = 'col-6 col-md-4 col-lg-3';
+                
+                const roleDef = player.role ? roleDefinitions.find(r => r.name === player.role) : null;
+                const roleColor = roleDef ? roleDef.color : '#666';
+                const roleIcon = roleDef ? roleDef.icon : 'fas fa-user';
+                
+                // Check if current player is Police
+                const isPolice = player.role === 'Police';
+                const isCurrentPlayer = player.id === currentPlayerId;
+                const isHostPlayer = player.isHost || player.id === gameState.hostId;
+                
+                col.innerHTML = `
+                    <div class="player-card text-center animate__animated animate__fadeInUp" style="animation-delay: ${index * 0.1}s">
+                        ${isPolice ? '<div class="police-badge"><i class="fas fa-shield-alt me-1"></i>POLICE</div>' : ''}
+                        ${isHostPlayer ? '<div class="host-badge"><i class="fas fa-crown me-1"></i>HOST</div>' : ''}
+                        
+                        <div class="player-avatar mb-3" style="border-color: ${roleColor}">
+                            <i class="${roleIcon}"></i>
+                        </div>
+                        <h6 class="fw-bold mb-1">${player.name} ${isCurrentPlayer ? '<span class="badge bg-info ms-1">You</span>' : ''}</h6>
+                        <div class="player-points text-warning mb-2">${gameState.gamePhase === 'results' || gameState.gamePhase === 'ended' ? player.points : '?'}</div>
+                        <div class="player-role">${gameState.gamePhase === 'results' || gameState.gamePhase === 'ended' ? (player.role || 'Hidden') : 'Hidden'}</div>
+                    </div>
+                `;
+                
+                playersList.appendChild(col);
+            });
+            
+            // Add empty slots
+            for (let i = gameState.players.length; i < 15; i++) {
+                const col = document.createElement('div');
+                col.className = 'col-6 col-md-4 col-lg-3';
+                col.innerHTML = `
+                    <div class="player-card text-center" style="opacity: 0.5">
+                        <div class="player-avatar mb-3">
+                            <i class="fas fa-user-plus"></i>
+                        </div>
+                        <h6 class="fw-bold mb-1">Waiting...</h6>
+                        <div class="player-points text-warning mb-2">-</div>
+                        <div class="player-role">---</div>
+                    </div>
+                `;
+                playersList.appendChild(col);
+            }
+        }
+
+        // Render cards
+        function renderCards() {
+            const cardsGrid = document.getElementById('cardsGrid');
+            cardsGrid.innerHTML = '';
+            
+            if (gameState.cards.length < gameState.players.length) {
+                gameState.cards = new Array(gameState.players.length).fill(null);
+            }
+            
+            const currentPlayer = gameState.players.find(p => p.id === currentPlayerId);
+            const hasCurrentPlayerCard = currentPlayer && currentPlayer.role !== null;
+            
+            gameState.players.forEach((player, index) => {
+                const cardData = gameState.cards[index];
+                const isTaken = cardData && cardData.playerId;
+                const isCurrentPlayerCard = isTaken && cardData.playerId === currentPlayerId;
+                
+                const col = document.createElement('div');
+                col.className = 'col-6 col-md-4 col-lg-3 mb-4';
+                
+                let cardHTML = '';
+                
+                if (isCurrentPlayerCard) {
+                    // Show revealed card for current player
+                    const roleDef = roleDefinitions.find(r => r.name === cardData.role);
+                    cardHTML = `
+                        <div class="card-3d flipped">
+                            <div class="card-face card-back">
+                                <i class="fas fa-question card-icon"></i>
+                                <div>Tap to reveal</div>
+                            </div>
+                            <div class="card-face card-front" style="border-color: ${roleDef.color}">
+                                <i class="${roleDef.icon} card-icon" style="color: ${roleDef.color}"></i>
+                                <div class="fw-bold mb-2">${cardData.role}</div>
+                                <div class="card-points">${cardData.points}</div>
+                                <small class="text-light">${player.name}</small>
+                            </div>
+                        </div>
+                    `;
+                } else if (isTaken && hasCurrentPlayerCard) {
+                    // Show locked card if current player already has a card
+                    cardHTML = `
+                        <div class="card-3d locked" style="opacity: 0.7">
+                            <div class="card-face card-back">
+                                <i class="fas fa-lock card-icon"></i>
+                                <div>Already Taken</div>
+                            </div>
+                            <div class="card-face card-front">
+                                <i class="fas fa-user-secret card-icon"></i>
+                                <div class="fw-bold mb-2">Taken</div>
+                                <div class="card-points">???</div>
+                                <small class="text-light">Another player</small>
+                            </div>
+                        </div>
+                    `;
+                } else if (!isTaken && !hasCurrentPlayerCard) {
+                    // Show available card
+                    cardHTML = `
+                        <div class="card-3d" onclick="selectCard(${index})">
+                            <div class="card-face card-back">
+                                <i class="fas fa-question card-icon"></i>
+                                <div>Tap to reveal</div>
+                            </div>
+                            <div class="card-face card-front">
+                                <i class="fas fa-user-secret card-icon"></i>
+                                <div class="fw-bold mb-2">Mystery Role</div>
+                                <div class="card-points">???</div>
+                                <small class="text-light">Available</small>
+                            </div>
+                        </div>
+                    `;
+                } else {
+                    // Show empty card
+                    cardHTML = `
+                        <div class="card-3d" style="opacity: 0.5">
+                            <div class="card-face card-back">
+                                <i class="fas fa-user card-icon"></i>
+                                <div>${player.name}</div>
+                            </div>
+                            <div class="card-face card-front">
+                                <i class="fas fa-user card-icon"></i>
+                                <div class="fw-bold mb-2">${player.name}</div>
+                                <div class="card-points">?</div>
+                                <small class="text-light">No card yet</small>
+                            </div>
+                        </div>
+                    `;
+                }
+                
+                col.innerHTML = cardHTML;
+                cardsGrid.appendChild(col);
             });
         }
-        
-        // Show role reveal
-        showRoleReveal(assignedRole);
-        updateUI();
-    }
 
-    // Show role reveal
-    function showRoleReveal(role) {
-        document.getElementById('roleIcon').className = role.icon + ' ' + `role-${role.name.toLowerCase()}`;
-        document.getElementById('roleIcon').style.color = role.color;
-        document.getElementById('roleName').textContent = role.name;
-        document.getElementById('rolePoints').textContent = `${role.points} POINTS`;
-        document.getElementById('roleDescription').textContent = role.description;
-        
-        const modal = new bootstrap.Modal(document.getElementById('roleRevealModal'));
-        modal.show();
-        
-        createConfetti();
-    }
-
-    // Start game
-    async function startGame() {
-        const currentPlayer = gameState.players.find(p => p.id === currentPlayerId);
-        if (!currentPlayer || !(currentPlayer.isHost || currentPlayer.id === gameState.hostId)) {
-            alert('Only the host can start the game!');
-            return;
-        }
-        
-        if (gameState.players.length < 4) {
-            alert(`Need at least 4 players to start! Currently have ${gameState.players.length} players.`);
-            return;
-        }
-        
-        gameState.gamePhase = 'cardSelection';
-        gameState.cards = new Array(gameState.players.length).fill(null);
-        gameState.policeVote = null;
-        gameState.thirudanId = null;
-        gameState.policeId = null;
-        gameState.votes = {};
-        gameState.timestamp = Date.now();
-        gameState.lastSync = Date.now();
-        
-        // Broadcast update
-        broadcastGameState();
-        
-        updateUI();
-        
-        createConfetti();
-        alert('🎮 Game started! Everyone choose your cards!');
-    }
-
-    // Leave game
-    function leaveGame() {
-        // Notify host if connected
-        if (!isHost && hostConnection) {
-            try {
-                hostConnection.send({
-                    type: 'playerLeft',
-                    playerId: currentPlayerId
-                });
-            } catch (error) {
-                console.error('Failed to notify host:', error);
-            }
-        }
-        
-        // Clear player-specific data
-        localStorage.removeItem('rajaRaniGameCode');
-        localStorage.removeItem('rajaRaniPlayerId');
-        localStorage.removeItem('rajaRaniPlayerName');
-        localStorage.removeItem('rajaRaniIsHost');
-        
-        // Close connections
-        if (peer) {
-            peer.destroy();
-        }
-        
-        // Reset state
-        currentPlayerId = null;
-        isHost = false;
-        gameState.code = null;
-        gameState.players = [];
-        
-        // Clear URL parameters
-        const newUrl = new URL(window.location);
-        newUrl.searchParams.delete('code');
-        newUrl.searchParams.delete('name');
-        newUrl.searchParams.delete('peer');
-        window.history.replaceState({}, '', newUrl);
-        
-        // Show home page
-        showHomePage();
-    }
-
-    // Event Listeners
-    document.addEventListener('DOMContentLoaded', function() {
-        // Load PeerJS library dynamically
-        const script = document.createElement('script');
-        script.src = 'https://unpkg.com/peerjs@1.4.7/dist/peerjs.min.js';
-        script.onload = initGame;
-        document.head.appendChild(script);
-        
-        // Button event listeners
-        document.getElementById('createGameBtn').addEventListener('click', generateGameCode);
-        
-        document.getElementById('joinExistingGameBtn').addEventListener('click', () => {
-            const modal = new bootstrap.Modal(document.getElementById('joinModal'));
-            document.getElementById('joinCode').value = '';
-            document.getElementById('playerName').value = `Player${Math.floor(Math.random() * 1000) + 1}`;
-            modal.show();
-        });
-        
-        document.getElementById('joinGameBtn').addEventListener('click', () => {
-            const modal = new bootstrap.Modal(document.getElementById('joinModal'));
-            const codeInput = document.getElementById('joinCode');
-            const nameInput = document.getElementById('playerName');
+        // Render voting
+        function renderVoting() {
+            const votingGrid = document.getElementById('votingGrid');
+            votingGrid.innerHTML = '';
             
-            codeInput.value = gameState.code || '';
-            nameInput.value = `Player${Math.floor(Math.random() * 1000) + 1}`;
-            modal.show();
-        });
-        
-        document.getElementById('homeInstructionsBtn').addEventListener('click', () => {
-            const modal = new bootstrap.Modal(document.getElementById('instructionsModal'));
-            modal.show();
-        });
-        
-        document.getElementById('closeGameBtn').addEventListener('click', () => {
-            if (confirm('Are you sure you want to leave the game?')) {
-                leaveGame();
-            }
-        });
-        
-        document.getElementById('showScoreboardBtn').addEventListener('click', () => {
-            alert('Scoreboard is already visible on the right side!');
-        });
-        
-        document.getElementById('showInstructionsBtn').addEventListener('click', () => {
-            const modal = new bootstrap.Modal(document.getElementById('instructionsModal'));
-            modal.show();
-        });
-        
-        document.getElementById('startGameBtn').addEventListener('click', startGame);
-        
-        document.getElementById('copyCodeBtn').addEventListener('click', () => {
-            if (gameState.code && myPeerId) {
-                const shareLink = `${window.location.origin}${window.location.pathname}?code=${gameState.code}&peer=${myPeerId}`;
-                navigator.clipboard.writeText(`Join my Raja Rani game!\n\nGame Code: ${gameState.code}\n\nJoin Link: ${shareLink}`).then(() => {
-                    alert('Game link copied to clipboard!');
-                }).catch(err => {
-                    alert('Failed to copy. Game Code: ' + gameState.code);
-                });
-            }
-        });
-        
-        // Join form submission
-        document.getElementById('joinForm').addEventListener('submit', function(e) {
-            e.preventDefault();
-            const name = document.getElementById('playerName').value.trim();
-            let code = document.getElementById('joinCode').value.trim().toUpperCase();
+            const currentPlayer = gameState.players.find(p => p.id === currentPlayerId);
+            const votingInstruction = document.getElementById('votingInstruction');
             
-            if (!name) {
-                alert('Please enter your name!');
+            if (currentPlayer && currentPlayer.role === 'Police') {
+                votingInstruction.innerHTML = `
+                    <span class="text-warning fw-bold">🔍 You are the Police!</span> Find and vote for the Thirudan.
+                    <div class="small text-light mt-1">Click on a player to vote for them</div>
+                `;
+            } else {
+                votingInstruction.innerHTML = `
+                    👀 Watch carefully as the Police tries to find the Thirudan.
+                    <div class="small text-light mt-1">Only Police can vote</div>
+                `;
+            }
+            
+            gameState.players.forEach((player, index) => {
+                if (player.id === currentPlayerId) return;
+                
+                const isVoted = gameState.votes[currentPlayerId] === player.id;
+                
+                const col = document.createElement('div');
+                col.className = 'col-6 col-md-4 col-lg-3 mb-4';
+                
+                col.innerHTML = `
+                    <div class="player-card text-center ${isVoted ? 'border-warning border-3' : ''}" 
+                         onclick="${currentPlayer && currentPlayer.role === 'Police' ? `selectVote('${player.id}')` : ''}"
+                         style="cursor: ${currentPlayer && currentPlayer.role === 'Police' ? 'pointer' : 'default'}; transform: ${isVoted ? 'scale(1.05)' : 'scale(1)'}">
+                        <div class="player-avatar mb-3 ${isVoted ? 'animate__animated animate__pulse animate__infinite' : ''}">
+                            <i class="fas fa-user"></i>
+                        </div>
+                        <h6 class="fw-bold mb-1">${player.name}</h6>
+                        <div class="player-points text-warning mb-2">?</div>
+                        <div class="player-role">?</div>
+                        ${isVoted ? '<div class="badge bg-warning mt-2"><i class="fas fa-vote-yea me-1"></i>Voted</div>' : ''}
+                    </div>
+                `;
+                
+                votingGrid.appendChild(col);
+            });
+        }
+
+        // Render results
+        function renderResults() {
+            const resultsGrid = document.getElementById('roundResultsGrid');
+            resultsGrid.innerHTML = '';
+            
+            const sortedPlayers = [...gameState.players].sort((a, b) => b.points - a.points);
+            
+            sortedPlayers.forEach((player, index) => {
+                const roleDef = player.role ? roleDefinitions.find(r => r.name === player.role) : null;
+                const roleColor = roleDef ? roleDef.color : '#666';
+                const roleIcon = roleDef ? roleDef.icon : 'fas fa-user';
+                
+                const col = document.createElement('div');
+                col.className = 'col-6 col-md-4 col-lg-3 mb-4';
+                
+                col.innerHTML = `
+                    <div class="player-card text-center ${index < 3 ? 'border-warning border-3' : ''}">
+                        <div class="player-avatar mb-3" style="border-color: ${roleColor}">
+                            <i class="${roleIcon}"></i>
+                        </div>
+                        <h6 class="fw-bold mb-1">${player.name}</h6>
+                        <div class="player-points text-warning mb-2">${player.points}</div>
+                        <div class="player-role">${player.role || 'Unknown'}</div>
+                    </div>
+                `;
+                
+                resultsGrid.appendChild(col);
+            });
+        }
+
+        // Render scoreboard
+        function renderScoreboard() {
+            const scoreTable = document.getElementById('scoreTable');
+            scoreTable.innerHTML = '';
+            
+            const sortedPlayers = [...gameState.players].sort((a, b) => b.points - a.points);
+            
+            sortedPlayers.forEach((player, index) => {
+                const roleDef = player.role ? roleDefinitions.find(r => r.name === player.role) : null;
+                const roleColor = roleDef ? roleDef.color : '#666';
+                
+                const row = document.createElement('tr');
+                row.className = 'score-row animate__animated animate__fadeIn';
+                row.style.animationDelay = `${index * 0.1}s`;
+                
+                row.innerHTML = `
+                    <td>
+                        <div class="rank-badge ${index === 0 ? 'rank-1' : index === 1 ? 'rank-2' : index === 2 ? 'rank-3' : 'bg-secondary'}">
+                            ${index + 1}
+                        </div>
+                    </td>
+                    <td class="fw-bold">${player.name} ${player.isHost || player.id === gameState.hostId ? '<i class="fas fa-crown text-warning ms-1"></i>' : ''} ${player.role === 'Police' ? '<i class="fas fa-shield-alt text-info ms-1"></i>' : ''}</td>
+                    <td class="text-warning fw-bold">${player.points}</td>
+                    <td style="color: ${roleColor}">${player.role || '-'}</td>
+                `;
+                
+                scoreTable.appendChild(row);
+            });
+        }
+
+        // Select card
+        async function selectCard(cardIndex) {
+            if (gameState.gamePhase !== 'cardSelection') return;
+            
+            const currentPlayer = gameState.players.find(p => p.id === currentPlayerId);
+            if (!currentPlayer) return;
+            
+            // Check if already has card
+            const hasCard = gameState.cards.some(c => c && c.playerId === currentPlayerId);
+            if (hasCard) {
+                alert('You already selected a card!');
                 return;
+            }
+            
+            // Check if card is taken
+            if (gameState.cards[cardIndex] && gameState.cards[cardIndex].playerId) {
+                alert('This card is already taken!');
+                return;
+            }
+            
+            // Determine role
+            const takenCards = gameState.cards.filter(c => c && c.playerId).length;
+            let assignedRole;
+            
+            if (takenCards < 4) {
+                const takenRoles = gameState.cards
+                    .filter(c => c && coreRoles.includes(c.role))
+                    .map(c => c.role);
+                const availableRoles = coreRoles.filter(role => !takenRoles.includes(role));
+                const roleName = availableRoles[Math.floor(Math.random() * availableRoles.length)];
+                assignedRole = roleDefinitions.find(r => r.name === roleName);
+            } else {
+                const takenRoles = gameState.cards
+                    .filter(c => c && c.role)
+                    .map(c => c.role);
+                const availableRoles = roleDefinitions.filter(role => !takenRoles.includes(role.name));
+                if (availableRoles.length === 0) {
+                    assignedRole = roleDefinitions[Math.floor(Math.random() * roleDefinitions.length)];
+                } else {
+                    assignedRole = availableRoles[Math.floor(Math.random() * availableRoles.length)];
+                }
+            }
+            
+            // Assign role
+            gameState.cards[cardIndex] = {
+                role: assignedRole.name,
+                points: assignedRole.points,
+                playerId: currentPlayerId
+            };
+            
+            // Update player
+            const playerIndex = gameState.players.findIndex(p => p.id === currentPlayerId);
+            gameState.players[playerIndex].role = assignedRole.name;
+            gameState.players[playerIndex].points = assignedRole.points;
+            
+            if (assignedRole.name === "Thirudan") gameState.thirudanId = currentPlayerId;
+            if (assignedRole.name === "Police") gameState.policeId = currentPlayerId;
+            
+            // Update timestamp
+            gameState.timestamp = Date.now();
+            gameState.lastSync = Date.now();
+            
+            // Save to server
+            await saveGameToServer(gameState);
+            
+            // Show role reveal
+            showRoleReveal(assignedRole);
+            updateUI();
+        }
+
+        // Show role reveal
+        function showRoleReveal(role) {
+            document.getElementById('roleIcon').className = role.icon + ' ' + `role-${role.name.toLowerCase()}`;
+            document.getElementById('roleIcon').style.color = role.color;
+            document.getElementById('roleName').textContent = role.name;
+            document.getElementById('rolePoints').textContent = `${role.points} POINTS`;
+            document.getElementById('roleDescription').textContent = role.description;
+            
+            const modal = new bootstrap.Modal(document.getElementById('roleRevealModal'));
+            modal.show();
+            
+            createConfetti();
+        }
+
+        // Select vote
+        async function selectVote(playerId) {
+            const currentPlayer = gameState.players.find(p => p.id === currentPlayerId);
+            if (!currentPlayer || currentPlayer.role !== 'Police') {
+                alert('Only Police can vote!');
+                return;
+            }
+            
+            if (playerId === currentPlayerId) {
+                alert("You cannot vote for yourself!");
+                return;
+            }
+            
+            gameState.votes[currentPlayerId] = playerId;
+            gameState.policeVote = playerId;
+            gameState.timestamp = Date.now();
+            gameState.lastSync = Date.now();
+            
+            await saveGameToServer(gameState);
+            updateUI();
+        }
+
+        // Start game
+        async function startGame() {
+            const currentPlayer = gameState.players.find(p => p.id === currentPlayerId);
+            if (!currentPlayer || !(currentPlayer.isHost || currentPlayer.id === gameState.hostId)) {
+                alert('Only the host can start the game!');
+                return;
+            }
+            
+            if (gameState.players.length < 4) {
+                alert(`Need at least 4 players to start! Currently have ${gameState.players.length} players.`);
+                return;
+            }
+            
+            gameState.gamePhase = 'cardSelection';
+            gameState.cards = new Array(gameState.players.length).fill(null);
+            gameState.policeVote = null;
+            gameState.thirudanId = null;
+            gameState.policeId = null;
+            gameState.votes = {};
+            gameState.timestamp = Date.now();
+            gameState.lastSync = Date.now();
+            
+            await saveGameToServer(gameState);
+            updateUI();
+            
+            createConfetti();
+            alert('🎮 Game started! Everyone choose your cards!');
+        }
+
+        // Continue to voting - ONLY POLICE CAN CLICK THIS
+        async function continueToVoting() {
+            const currentPlayer = gameState.players.find(p => p.id === currentPlayerId);
+            
+            // Check if current player is Police
+            if (!currentPlayer || currentPlayer.role !== 'Police') {
+                alert('Only Police can continue to voting phase!');
+                return;
+            }
+            
+            // Check if all players have selected cards
+            const playersWithCards = gameState.players.filter(p => p.role !== null).length;
+            if (playersWithCards < gameState.players.length) {
+                alert(`Not all players have selected cards yet! ${playersWithCards}/${gameState.players.length} players have cards.`);
+                return;
+            }
+            
+            gameState.gamePhase = 'voting';
+            gameState.votes = {};
+            gameState.policeVote = null;
+            gameState.timestamp = Date.now();
+            gameState.lastSync = Date.now();
+            
+            await saveGameToServer(gameState);
+            updateUI();
+            
+            alert('🔍 Voting phase started! Police, find the Thirudan!');
+        }
+
+        // Show voting results - ALL PLAYERS CAN CLICK THIS
+        async function showVotingResults() {
+            // Check if Police has voted
+            if (gameState.policeVote === null) {
+                alert('Police has not voted yet!');
+                return;
+            }
+            
+            gameState.gamePhase = 'results';
+            const policeCorrect = gameState.policeVote === gameState.thirudanId;
+            
+            // Update points
+            gameState.players.forEach(player => {
+                if (player.id === gameState.policeId) {
+                    player.points += policeCorrect ? 100 : 0;
+                } else if (player.id === gameState.thirudanId) {
+                    player.points += policeCorrect ? 0 : 100;
+                }
+            });
+            
+            // Update result message
+            const thirudanPlayer = gameState.players.find(p => p.id === gameState.thirudanId);
+            const thirudanName = thirudanPlayer ? thirudanPlayer.name : 'Thirudan';
+            const policePlayer = gameState.players.find(p => p.id === gameState.policeId);
+            const policeName = policePlayer ? policePlayer.name : 'Police';
+            
+            const roundResult = document.getElementById('roundResult');
+            if (policeCorrect) {
+                roundResult.innerHTML = `
+                    <div class="alert alert-success">
+                        <i class="fas fa-check-circle me-2"></i>
+                        Police (<strong>${policeName}</strong>) correctly identified <strong>${thirudanName}</strong> as the Thirudan!
+                        <div class="mt-2">+100 points to Police!</div>
+                    </div>
+                `;
+            } else {
+                roundResult.innerHTML = `
+                    <div class="alert alert-danger">
+                        <i class="fas fa-times-circle me-2"></i>
+                        Police (<strong>${policeName}</strong>) failed to identify <strong>${thirudanName}</strong> as the Thirudan!
+                        <div class="mt-2">+100 points to Thirudan!</div>
+                    </div>
+                `;
+            }
+            
+            gameState.timestamp = Date.now();
+            gameState.lastSync = Date.now();
+            
+            await saveGameToServer(gameState);
+            updateUI();
+            createConfetti();
+        }
+
+        // Next round - HOST ONLY
+        async function nextRound() {
+            const currentPlayer = gameState.players.find(p => p.id === currentPlayerId);
+            if (!currentPlayer || !(currentPlayer.isHost || currentPlayer.id === gameState.hostId)) {
+                alert('Only the host can start next round!');
+                return;
+            }
+            
+            gameState.round++;
+            gameState.cards = new Array(gameState.players.length).fill(null);
+            gameState.votes = {};
+            gameState.policeVote = null;
+            gameState.thirudanId = null;
+            gameState.policeId = null;
+            
+            gameState.players.forEach(player => {
+                player.role = null;
+            });
+            
+            gameState.gamePhase = 'cardSelection';
+            gameState.timestamp = Date.now();
+            gameState.lastSync = Date.now();
+            document.getElementById('currentRound').textContent = gameState.round;
+            
+            await saveGameToServer(gameState);
+            updateUI();
+            
+            alert(`🔄 Round ${gameState.round} started! New roles for everyone!`);
+        }
+
+        // End game - HOST ONLY
+        async function endGame() {
+            const currentPlayer = gameState.players.find(p => p.id === currentPlayerId);
+            if (!currentPlayer || !(currentPlayer.isHost || currentPlayer.id === gameState.hostId)) {
+                alert('Only the host can end the game!');
+                return;
+            }
+            
+            if (confirm('Are you sure you want to end the game for all players?')) {
+                // Remove game from server
+                const allGames = JSON.parse(localStorage.getItem('rajaRaniAllGames') || '{}');
+                delete allGames[gameState.code];
+                localStorage.setItem('rajaRaniAllGames', JSON.stringify(allGames));
+                
+                leaveGame();
+                alert('Game ended! Returning to home page.');
+            }
+        }
+
+        // Join game
+        async function joinGame(name, code) {
+            if (!name.trim()) {
+                alert('Please enter your name!');
+                return false;
             }
             
             if (!code || code.length < 5) {
-                alert('Please enter a valid game code (5-6 characters)!');
-                return;
+                alert('Please enter a valid 5-6 character game code!');
+                return false;
             }
             
-            const success = joinGame(name, code);
-            if (success) {
+            const gameCode = code.toUpperCase();
+            
+            try {
+                // Check if game exists
+                const gameData = await loadGameFromServer(gameCode);
+                
+                if (!gameData) {
+                    alert('Game not found! Please check the game code.\n\nMake sure:\n1. The host created the game\n2. You entered the code correctly\n3. The game hasn\'t expired');
+                    return false;
+                }
+                
+                // Set game state
+                gameState.code = gameCode;
+                Object.assign(gameState, gameData);
+                
+                // Check if name already exists
+                const nameExists = gameState.players.some(p => p.name.toLowerCase() === name.toLowerCase());
+                if (nameExists) {
+                    alert(`Name "${name}" is already taken in this game. Please use a different name.`);
+                    return false;
+                }
+                
+                // Check if game is full
+                if (gameState.players.length >= 15) {
+                    alert('Game is full! Maximum 15 players allowed.');
+                    return false;
+                }
+                
+                // Create new player
+                currentPlayerId = 'player_' + Date.now() + '_' + Math.random().toString(36).substr(2, 9);
+                isHost = false;
+                
+                const player = {
+                    id: currentPlayerId,
+                    name: name.trim(),
+                    role: null,
+                    points: 0,
+                    isHost: false,
+                    joinedAt: Date.now(),
+                    lastActive: Date.now()
+                };
+                
+                gameState.players.push(player);
+                
+                // Save player info
+                localStorage.setItem('rajaRaniGameCode', gameState.code);
+                localStorage.setItem('rajaRaniPlayerId', currentPlayerId);
+                localStorage.setItem('rajaRaniPlayerName', name.trim());
+                localStorage.setItem('rajaRaniIsHost', 'false');
+                
+                // Update game on server
+                gameState.timestamp = Date.now();
+                gameState.lastSync = Date.now();
+                await saveGameToServer(gameState);
+                
+                // Start polling
+                startGamePolling();
+                
+                // Update UI and show game page
+                updateUI();
+                showGamePage();
+                
+                alert(`✅ Welcome to the game, ${name}!\n\nGame: ${gameState.code}\nPlayers: ${gameState.players.length}/15\n\nWaiting for host to start...`);
+                
                 const modal = bootstrap.Modal.getInstance(document.getElementById('joinModal'));
-                modal.hide();
+                if (modal) {
+                    modal.hide();
+                }
+                
+                // Update URL with game code for easy sharing
+                const newUrl = new URL(window.location);
+                newUrl.searchParams.set('code', gameCode);
+                newUrl.searchParams.set('name', name.trim());
+                window.history.replaceState({}, '', newUrl);
+                
+                return true;
+                
+            } catch (error) {
+                console.error('Error joining game:', error);
+                alert('Error joining game. Please try again.');
+                return false;
             }
-        });
-        
-        // Auto-fill player name
-        document.getElementById('playerName').value = `Player${Math.floor(Math.random() * 1000) + 1}`;
-    });
-</script>
-</body>
-</html>
+        }
 
+        // Leave game
+        function leaveGame() {
+            // Remove player from game state
+            const playerIndex = gameState.players.findIndex(p => p.id === currentPlayerId);
+            if (playerIndex !== -1 && gameState.code) {
+                gameState.players.splice(playerIndex, 1);
+                
+                // Update the game state if there are still players
+                if (gameState.players.length > 0) {
+                    saveGameToServer(gameState).catch(console.error);
+                } else {
+                    // No players left, clean up game
+                    const allGames = JSON.parse(localStorage.getItem('rajaRaniAllGames') || '{}');
+                    delete allGames[gameState.code];
+                    localStorage.setItem('rajaRaniAllGames', JSON.stringify(allGames));
+                }
+            }
+            
+            // Clear player-specific data
+            localStorage.removeItem('rajaRaniGameCode');
+            localStorage.removeItem('rajaRaniPlayerId');
+            localStorage.removeItem('rajaRaniPlayerName');
+            localStorage.removeItem('rajaRaniIsHost');
+            
+            // Clear polling
+            if (gamePollInterval) {
+                clearInterval(gamePollInterval);
+                gamePollInterval = null;
+            }
+            
+            // Reset state
+            currentPlayerId = null;
+            isHost = false;
+            gameState.code = null;
+            gameState.players = [];
+            
+            // Clear URL parameters
+            const newUrl = new URL(window.location);
+            newUrl.searchParams.delete('code');
+            newUrl.searchParams.delete('name');
+            window.history.replaceState({}, '', newUrl);
+            
+            // Show home page
+            showHomePage();
+        }
+
+        // Update button states
+        function updateButtonStates() {
+            const currentPlayer = gameState.players.find(p => p.id === currentPlayerId);
+            const isHostPlayer = currentPlayer && (currentPlayer.isHost || currentPlayer.id === gameState.hostId);
+            const isPolice = currentPlayer && currentPlayer.role === 'Police';
+            
+            // Start game button - HOST ONLY
+            const startGameBtn = document.getElementById('startGameBtn');
+            if (isHostPlayer && gameState.players.length >= 4 && gameState.gamePhase === 'waiting') {
+                startGameBtn.disabled = false;
+                startGameBtn.classList.remove('btn-secondary');
+                startGameBtn.classList.add('btn-success');
+                document.getElementById('startGameDescription').textContent = 'Ready to start the game!';
+            } else {
+                startGameBtn.disabled = true;
+                startGameBtn.classList.remove('btn-success');
+                startGameBtn.classList.add('btn-secondary');
+            }
+            
+            // Continue to voting button - POLICE ONLY
+            const continueToVotingBtn = document.getElementById('continueToVotingBtn');
+            const allCardsSelected = gameState.cards.filter(c => c && c.playerId).length >= gameState.players.length;
+            
+            if (gameState.gamePhase === 'cardSelection') {
+                if (isPolice) {
+                    continueToVotingBtn.disabled = !allCardsSelected;
+                    continueToVotingBtn.style.display = 'block';
+                    continueToVotingBtn.innerHTML = '<i class="fas fa-shield-alt me-2"></i>CONTINUE TO VOTING (POLICE ONLY)';
+                    continueToVotingBtn.classList.remove('btn-warning');
+                    continueToVotingBtn.classList.add('btn-info');
+                } else {
+                    continueToVotingBtn.style.display = 'none';
+                }
+                
+                // Update cards status
+                const cardsSelected = gameState.cards.filter(c => c && c.playerId).length;
+                const cardsStatus = document.getElementById('cardsStatus');
+                if (allCardsSelected) {
+                    cardsStatus.innerHTML = `<span class="text-success">✅ All players have selected cards!</span><br><small class="text-light">Police can continue to voting</small>`;
+                } else {
+                    cardsStatus.innerHTML = `<span class="text-warning">${cardsSelected}/${gameState.players.length} players selected cards</span><br><small class="text-light">Waiting for all players to choose...</small>`;
+                }
+            } else {
+                continueToVotingBtn.style.display = 'none';
+            }
+            
+            // Submit vote button - POLICE ONLY
+            const submitVoteBtn = document.getElementById('submitVoteBtn');
+            submitVoteBtn.disabled = !isPolice || gameState.policeVote !== null;
+            
+            // Show results button - AVAILABLE TO ALL PLAYERS
+            const showResultsBtn = document.getElementById('showResultsBtn');
+            const policeVoted = gameState.policeVote !== null;
+            
+            if (gameState.gamePhase === 'voting') {
+                showResultsBtn.disabled = !policeVoted;
+                if (policeVoted) {
+                    showResultsBtn.innerHTML = '<i class="fas fa-eye me-2"></i>SHOW RESULTS (ALL PLAYERS)';
+                    showResultsBtn.classList.remove('btn-warning');
+                    showResultsBtn.classList.add('btn-success');
+                } else {
+                    showResultsBtn.innerHTML = '<i class="fas fa-forward me-2"></i>SHOW RESULTS';
+                    showResultsBtn.classList.remove('btn-success');
+                    showResultsBtn.classList.add('btn-warning');
+                }
+            }
+            
+            // Next round and End game buttons - HOST ONLY
+            const nextRoundBtn = document.getElementById('nextRoundBtn');
+            const endGameBtn = document.getElementById('endGameBtn');
+            
+            if (gameState.gamePhase === 'results') {
+                if (isHostPlayer) {
+                    nextRoundBtn.disabled = false;
+                    endGameBtn.disabled = false;
+                } else {
+                    nextRoundBtn.disabled = true;
+                    endGameBtn.disabled = true;
+                    nextRoundBtn.innerHTML = '<i class="fas fa-user-crown me-2"></i>HOST ONLY';
+                    endGameBtn.innerHTML = '<i class="fas fa-user-crown me-2"></i>HOST ONLY';
+                    nextRoundBtn.classList.remove('btn-success');
+                    endGameBtn.classList.remove('btn-danger');
+                    nextRoundBtn.classList.add('btn-secondary');
+                    endGameBtn.classList.add('btn-secondary');
+                }
+            }
+        }
+
+        // Event Listeners
+        document.addEventListener('DOMContentLoaded', function() {
+            initGame();
+            
+            // Button event listeners
+            document.getElementById('createGameBtn').addEventListener('click', generateGameCode);
+            
+            document.getElementById('joinExistingGameBtn').addEventListener('click', () => {
+                const modal = new bootstrap.Modal(document.getElementById('joinModal'));
+                document.getElementById('joinCode').value = '';
+                document.getElementById('playerName').value = `Player${Math.floor(Math.random() * 1000) + 1}`;
+                modal.show();
+            });
+            
+            document.getElementById('joinGameBtn').addEventListener('click', () => {
+                const modal = new bootstrap.Modal(document.getElementById('joinModal'));
+                const codeInput = document.getElementById('joinCode');
+                const nameInput = document.getElementById('playerName');
+                
+                codeInput.value = gameState.code || '';
+                nameInput.value = `Player${Math.floor(Math.random() * 1000) + 1}`;
+                modal.show();
+            });
+            
+            document.getElementById('homeInstructionsBtn').addEventListener('click', () => {
+                const modal = new bootstrap.Modal(document.getElementById('instructionsModal'));
+                modal.show();
+            });
+            
+            document.getElementById('closeGameBtn').addEventListener('click', () => {
+                if (confirm('Are you sure you want to leave the game?')) {
+                    leaveGame();
+                }
+            });
+            
+            document.getElementById('showScoreboardBtn').addEventListener('click', () => {
+                alert('Scoreboard is already visible on the right side!');
+            });
+            
+            document.getElementById('showInstructionsBtn').addEventListener('click', () => {
+                const modal = new bootstrap.Modal(document.getElementById('instructionsModal'));
+                modal.show();
+            });
+            
+            document.getElementById('startGameBtn').addEventListener('click', startGame);
+            document.getElementById('continueToVotingBtn').addEventListener('click', continueToVoting);
+            document.getElementById('submitVoteBtn').addEventListener('click', () => {
+                if (gameState.policeVote) {
+                    alert('Vote submitted! Click "Show Results" to see the outcome.');
+                } else {
+                    alert('Please select a player to vote for first!');
+                }
+            });
+            
+            document.getElementById('clearVoteBtn').addEventListener('click', () => {
+                delete gameState.votes[currentPlayerId];
+                gameState.policeVote = null;
+                saveGameToServer(gameState);
+                updateUI();
+            });
+            
+            document.getElementById('showResultsBtn').addEventListener('click', showVotingResults);
+            document.getElementById('nextRoundBtn').addEventListener('click', nextRound);
+            document.getElementById('endGameBtn').addEventListener('click', endGame);
+            document.getElementById('copyCodeBtn').addEventListener('click', () => {
+                if (gameState.code) {
+                    navigator.clipboard.writeText(gameState.code).then(() => {
+                        alert('Game code copied to clipboard!');
+                    }).catch(err => {
+                        console.error('Failed to copy: ', err);
+                        alert('Failed to copy code. Please copy manually: ' + gameState.code);
+                    });
+                }
+            });
+            
+            document.getElementById('generateCodeBtn').addEventListener('click', generateGameCode);
+            
+            // Join form submission
+            document.getElementById('joinForm').addEventListener('submit', function(e) {
+                e.preventDefault();
+                const name = document.getElementById('playerName').value.trim();
+                let code = document.getElementById('joinCode').value.trim().toUpperCase();
+                
+                if (!name) {
+                    alert('Please enter your name!');
+                    return;
+                }
+                
+                if (!code || code.length < 5) {
+                    alert('Please enter a valid game code (5-6 characters)!');
+                    return;
+                }
+                
+                const success = joinGame(name, code);
+                if (success) {
+                    const modal = bootstrap.Modal.getInstance(document.getElementById('joinModal'));
+                    modal.hide();
+                }
+            });
+            
+            // Auto-fill player name
+            document.getElementById('playerName').value = `Player${Math.floor(Math.random() * 1000) + 1}`;
+        });
+    </script>
+</body>
+</html> 
