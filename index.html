@@ -1,4 +1,3 @@
-
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -14,6 +13,12 @@
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800;900&family=Orbitron:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
     <!-- Animate.css -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css">
+    
+    <!-- PWA Manifest -->
+    <link rel="manifest" href="manifest.json">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     
     <style>
         :root {
@@ -1201,7 +1206,12 @@
         let selectedVote = null;
         let isHost = false;
         let gamePollInterval = null;
-        let serverURL = 'https://jsonblob.com/api/jsonBlob';
+
+        // JSONBin.io Configuration - REPLACE WITH YOUR OWN API KEY
+        // Get free API key from: https://jsonbin.io/
+        const JSONBIN_API_KEY = '$2a$10$TUNbDNGPL0F2.v8.BHIDQOdCoFxyNYiJz6DgXx9TDmq2M7ur4Ow.i'; // Replace with your actual key
+        const JSONBIN_BIN_ID = '6979de2d43b1c97be9516254'; // This will be created automatically
+        const JSONBIN_URL = 'https://api.jsonbin.io/v3/b';
 
         // Role definitions
         const roleDefinitions = [
@@ -1287,35 +1297,6 @@
                         modal.show();
                     }, 1000);
                 }
-            }
-            
-            // Check for saved game
-            const savedCode = localStorage.getItem('rajaRaniGameCode');
-            const savedPlayerId = localStorage.getItem('rajaRaniPlayerId');
-            
-            if (savedCode && savedPlayerId) {
-                // Try to load game
-                loadGameFromServer(savedCode).then(gameData => {
-                    if (gameData && gameData.code === savedCode) {
-                        gameState.code = savedCode;
-                        Object.assign(gameState, gameData);
-                        currentPlayerId = savedPlayerId;
-                        isHost = localStorage.getItem('rajaRaniIsHost') === 'true';
-                        
-                        // Check if player exists
-                        const playerExists = gameState.players.some(p => p.id === currentPlayerId);
-                        if (playerExists) {
-                            startGamePolling();
-                            showGamePage();
-                        } else {
-                            showHomePage();
-                        }
-                    } else {
-                        showHomePage();
-                    }
-                }).catch(() => {
-                    showHomePage();
-                });
             } else {
                 showHomePage();
             }
@@ -1360,6 +1341,176 @@
             return code;
         }
 
+        // Save game to JSONBin.io (Cloud Storage)
+        async function saveGameToServer(gameData) {
+            try {
+                const gameCode = gameData.code;
+                if (!gameCode) {
+                    console.error('No game code provided');
+                    return false;
+                }
+                
+                // Prepare game state
+                const gameToSave = {
+                    ...gameData,
+                    lastUpdated: Date.now(),
+                    expiresAt: Date.now() + 7200000 // 2 hours from now
+                };
+                
+                try {
+                    // Try to save to JSONBin.io
+                    const response = await fetch(`${JSONBIN_URL}/${JSONBIN_BIN_ID}`, {
+                        method: 'PUT',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'X-Master-Key': JSONBIN_API_KEY,
+                            'X-Bin-Name': `RajaRani-${gameCode}`,
+                            'X-Bin-Versioning': false
+                        },
+                        body: JSON.stringify({
+                            [gameCode]: gameToSave
+                        })
+                    });
+                    
+                    if (response.ok) {
+                        console.log('Game saved to cloud:', gameCode);
+                        return true;
+                    }
+                } catch (cloudError) {
+                    console.log('Cloud save failed, using localStorage:', cloudError);
+                }
+                
+                // Fallback to localStorage
+                const allGames = JSON.parse(localStorage.getItem('rajaRaniAllGames') || '{}');
+                allGames[gameData.code] = {
+                    ...gameData,
+                    lastUpdated: Date.now()
+                };
+                localStorage.setItem('rajaRaniAllGames', JSON.stringify(allGames));
+                
+                // Also save to sessionStorage for cross-tab
+                sessionStorage.setItem('rajaRaniGameUpdate_' + gameData.code, JSON.stringify(gameData));
+                
+                return true;
+                
+            } catch (error) {
+                console.error('Error saving game:', error);
+                
+                // Last resort fallback
+                const allGames = JSON.parse(localStorage.getItem('rajaRaniAllGames') || '{}');
+                allGames[gameData.code] = gameData;
+                localStorage.setItem('rajaRaniAllGames', JSON.stringify(allGames));
+                
+                return false;
+            }
+        }
+
+        // Load game from server
+        async function loadGameFromServer(gameCode) {
+            try {
+                // First try JSONBin.io
+                try {
+                    const response = await fetch(`${JSONBIN_URL}/${JSONBIN_BIN_ID}/latest`, {
+                        headers: {
+                            'X-Master-Key': JSONBIN_API_KEY
+                        }
+                    });
+                    
+                    if (response.ok) {
+                        const data = await response.json();
+                        const games = data.record || {};
+                        const gameData = games[gameCode];
+                        
+                        if (gameData) {
+                            // Check if game is expired
+                            if (gameData.expiresAt && Date.now() > gameData.expiresAt) {
+                                console.log('Game expired, removing...');
+                                await deleteGameFromServer(gameCode);
+                                return null;
+                            }
+                            
+                            // Clean up inactive players (not active for 60 seconds)
+                            const now = Date.now();
+                            if (gameData.players) {
+                                gameData.players = gameData.players.filter(player => {
+                                    return now - (player.lastActive || 0) < 60000;
+                                });
+                            }
+                            
+                            return gameData;
+                        }
+                    }
+                } catch (cloudError) {
+                    console.log('Cloud load failed, trying localStorage:', cloudError);
+                }
+                
+                // Fallback to localStorage
+                const allGames = JSON.parse(localStorage.getItem('rajaRaniAllGames') || '{}');
+                const gameData = allGames[gameCode];
+                
+                if (gameData) {
+                    // Check if game is expired (older than 2 hours)
+                    if (gameData.lastUpdated && Date.now() - gameData.lastUpdated > 7200000) {
+                        delete allGames[gameCode];
+                        localStorage.setItem('rajaRaniAllGames', JSON.stringify(allGames));
+                        return null;
+                    }
+                    
+                    return gameData;
+                }
+                
+                return null;
+                
+            } catch (error) {
+                console.error('Error loading game:', error);
+                
+                // Final fallback
+                const allGames = JSON.parse(localStorage.getItem('rajaRaniAllGames') || '{}');
+                return allGames[gameCode] || null;
+            }
+        }
+
+        // Delete game from server
+        async function deleteGameFromServer(gameCode) {
+            try {
+                // Try to delete from JSONBin.io
+                try {
+                    const response = await fetch(`${JSONBIN_URL}/${JSONBIN_BIN_ID}/latest`, {
+                        headers: {
+                            'X-Master-Key': JSONBIN_API_KEY
+                        }
+                    });
+                    
+                    if (response.ok) {
+                        const data = await response.json();
+                        const games = data.record || {};
+                        
+                        // Remove the specific game
+                        delete games[gameCode];
+                        
+                        // Save updated games
+                        await fetch(`${JSONBIN_URL}/${JSONBIN_BIN_ID}`, {
+                            method: 'PUT',
+                            headers: {
+                                'Content-Type': 'application/json',
+                                'X-Master-Key': JSONBIN_API_KEY
+                            },
+                            body: JSON.stringify(games)
+                        });
+                    }
+                } catch (cloudError) {
+                    console.log('Cloud delete failed:', cloudError);
+                }
+            } catch (error) {
+                console.error('Error deleting game from cloud:', error);
+            }
+            
+            // Also delete from localStorage
+            const allGames = JSON.parse(localStorage.getItem('rajaRaniAllGames') || '{}');
+            delete allGames[gameCode];
+            localStorage.setItem('rajaRaniAllGames', JSON.stringify(allGames));
+        }
+
         // Create new game
         async function createNewGame(code) {
             gameState.code = code.toUpperCase();
@@ -1396,7 +1547,7 @@
             localStorage.setItem('rajaRaniIsHost', 'true');
             
             try {
-                // Save to server
+                // Save to cloud
                 await saveGameToServer(gameState);
                 
                 // Start polling
@@ -1424,63 +1575,6 @@
             } catch (error) {
                 console.error('Error creating game:', error);
                 alert('Error creating game. Please try again.');
-            }
-        }
-
-        // Save game to server
-        async function saveGameToServer(gameData) {
-            try {
-                // For cross-device multiplayer, we'll use localStorage as a fallback
-                // and also try to use a simple server simulation
-                
-                // Method 1: Use localStorage with a shared key pattern
-                const allGames = JSON.parse(localStorage.getItem('rajaRaniAllGames') || '{}');
-                allGames[gameData.code] = {
-                    ...gameData,
-                    lastUpdated: Date.now()
-                };
-                localStorage.setItem('rajaRaniAllGames', JSON.stringify(allGames));
-                
-                // Method 2: Try to use sessionStorage for cross-tab
-                sessionStorage.setItem('rajaRaniGameUpdate_' + gameData.code, JSON.stringify(gameData));
-                
-                return true;
-            } catch (error) {
-                console.error('Error saving game:', error);
-                throw error;
-            }
-        }
-
-        // Load game from server
-        async function loadGameFromServer(gameCode) {
-            try {
-                // Method 1: Check localStorage for all games
-                const allGames = JSON.parse(localStorage.getItem('rajaRaniAllGames') || '{}');
-                const gameData = allGames[gameCode];
-                
-                if (gameData) {
-                    // Check if game is expired (older than 2 hours)
-                    if (gameData.lastUpdated && Date.now() - gameData.lastUpdated > 7200000) {
-                        delete allGames[gameCode];
-                        localStorage.setItem('rajaRaniAllGames', JSON.stringify(allGames));
-                        return null;
-                    }
-                    
-                    // Clean up inactive players (not active for 60 seconds)
-                    const now = Date.now();
-                    if (gameData.players) {
-                        gameData.players = gameData.players.filter(player => {
-                            return now - player.lastActive < 60000;
-                        });
-                    }
-                    
-                    return gameData;
-                }
-                
-                return null;
-            } catch (error) {
-                console.error('Error loading game:', error);
-                return null;
             }
         }
 
@@ -2172,9 +2266,7 @@
             
             if (confirm('Are you sure you want to end the game for all players?')) {
                 // Remove game from server
-                const allGames = JSON.parse(localStorage.getItem('rajaRaniAllGames') || '{}');
-                delete allGames[gameState.code];
-                localStorage.setItem('rajaRaniAllGames', JSON.stringify(allGames));
+                await deleteGameFromServer(gameState.code);
                 
                 leaveGame();
                 alert('Game ended! Returning to home page.');
@@ -2289,9 +2381,7 @@
                     saveGameToServer(gameState).catch(console.error);
                 } else {
                     // No players left, clean up game
-                    const allGames = JSON.parse(localStorage.getItem('rajaRaniAllGames') || '{}');
-                    delete allGames[gameState.code];
-                    localStorage.setItem('rajaRaniAllGames', JSON.stringify(allGames));
+                    deleteGameFromServer(gameState.code).catch(console.error);
                 }
             }
             
@@ -2513,7 +2603,16 @@
             
             // Auto-fill player name
             document.getElementById('playerName').value = `Player${Math.floor(Math.random() * 1000) + 1}`;
+            
+            // Service Worker for PWA
+            if ('serviceWorker' in navigator) {
+                window.addEventListener('load', () => {
+                    navigator.serviceWorker.register('/sw.js').catch(error => {
+                        console.log('ServiceWorker registration failed:', error);
+                    });
+                });
+            }
         });
     </script>
 </body>
-</html> 
+</html>
