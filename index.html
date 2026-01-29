@@ -14,12 +14,6 @@
     <!-- Animate.css -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css">
     
-    <!-- PWA Manifest -->
-    <link rel="manifest" href="manifest.json">
-    <meta name="apple-mobile-web-app-capable" content="yes">
-    <meta name="mobile-web-app-capable" content="yes">
-    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-    
     <style>
         :root {
             --primary-purple: #8A2BE2;
@@ -95,6 +89,131 @@
             box-shadow: var(--neon-glow);
         }
 
+        /* Auth Pages */
+        .auth-container {
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+
+        .auth-card {
+            background: rgba(20, 20, 40, 0.95);
+            backdrop-filter: blur(20px);
+            border: 2px solid var(--primary-purple);
+            border-radius: 20px;
+            padding: 40px;
+            width: 100%;
+            max-width: 450px;
+            box-shadow: 
+                0 30px 60px rgba(0, 0, 0, 0.5),
+                0 0 50px rgba(138, 43, 226, 0.3);
+        }
+
+        .auth-tabs {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 30px;
+        }
+
+        .auth-tab {
+            flex: 1;
+            padding: 15px;
+            background: rgba(255, 255, 255, 0.05);
+            border: none;
+            border-radius: 10px;
+            color: white;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .auth-tab.active {
+            background: linear-gradient(45deg, var(--primary-purple), var(--secondary-orange));
+            transform: translateY(-3px);
+            box-shadow: 0 10px 20px rgba(138, 43, 226, 0.3);
+        }
+
+        .auth-form {
+            display: none;
+        }
+
+        .auth-form.active {
+            display: block;
+            animation: fadeIn 0.5s ease;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        /* Profile Section */
+        .profile-dropdown {
+            position: relative;
+        }
+
+        .profile-btn {
+            width: 45px;
+            height: 45px;
+            border-radius: 50%;
+            background: linear-gradient(45deg, var(--primary-purple), var(--secondary-orange));
+            border: none;
+            color: white;
+            font-size: 1.2rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .profile-btn:hover {
+            transform: scale(1.1);
+            box-shadow: 0 0 20px rgba(138, 43, 226, 0.5);
+        }
+
+        .profile-menu {
+            position: absolute;
+            top: 100%;
+            right: 0;
+            background: rgba(20, 20, 40, 0.98);
+            backdrop-filter: blur(20px);
+            border: 2px solid var(--primary-purple);
+            border-radius: 15px;
+            padding: 20px;
+            min-width: 300px;
+            display: none;
+            z-index: 1000;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.5);
+        }
+
+        .profile-menu.show {
+            display: block;
+            animation: slideDown 0.3s ease;
+        }
+
+        @keyframes slideDown {
+            from { opacity: 0; transform: translateY(-10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .profile-header {
+            text-align: center;
+            margin-bottom: 20px;
+        }
+
+        .profile-avatar {
+            width: 80px;
+            height: 80px;
+            border-radius: 50%;
+            background: linear-gradient(45deg, var(--primary-purple), var(--secondary-orange));
+            margin: 0 auto 15px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 2rem;
+            border: 3px solid rgba(255, 255, 255, 0.2);
+        }
+
         /* Navigation */
         .main-nav {
             background: rgba(10, 10, 20, 0.95);
@@ -154,7 +273,7 @@
             padding: 20px;
         }
 
-        /* Cards - Enhanced 3D */
+        /* Cards */
         .card-3d {
             position: relative;
             height: 180px;
@@ -193,17 +312,6 @@
             color: white;
             transform: rotateY(0deg);
             border: 3px solid rgba(255, 255, 255, 0.2);
-        }
-
-        .card-back::before {
-            content: '';
-            position: absolute;
-            top: -50%;
-            left: -50%;
-            width: 200%;
-            height: 200%;
-            background: radial-gradient(circle, rgba(255, 255, 255, 0.1) 0%, transparent 70%);
-            animation: rotate 20s linear infinite;
         }
 
         .card-front {
@@ -347,10 +455,6 @@
                 0 0 30px rgba(255, 107, 53, 0.5);
         }
 
-        .btn-neon:active {
-            transform: translateY(0) scale(0.98);
-        }
-
         /* Action Center */
         .action-center {
             background: linear-gradient(135deg, rgba(138, 43, 226, 0.1), rgba(255, 107, 53, 0.1));
@@ -361,26 +465,14 @@
             overflow: hidden;
         }
 
-        .action-center::before {
-            content: '';
-            position: absolute;
-            top: -2px;
-            left: -2px;
-            right: -2px;
-            bottom: -2px;
-            background: linear-gradient(45deg, var(--primary-purple), var(--secondary-orange), var(--primary-purple));
-            z-index: -1;
-            filter: blur(20px);
-            opacity: 0.5;
-            animation: rotate 3s linear infinite;
-        }
-
         /* Scoreboard */
         .scoreboard {
             background: linear-gradient(135deg, rgba(26, 26, 46, 0.8), rgba(22, 33, 62, 0.8));
             border-radius: 15px;
             overflow: hidden;
             border: 1px solid rgba(255, 255, 255, 0.1);
+            max-height: 400px;
+            overflow-y: auto;
         }
 
         .score-row {
@@ -419,11 +511,6 @@
                 0 0 50px rgba(138, 43, 226, 0.3);
         }
 
-        .modal-header {
-            border-bottom: 2px solid rgba(255, 255, 255, 0.1);
-            background: linear-gradient(90deg, rgba(138, 43, 226, 0.1), rgba(255, 107, 53, 0.1));
-        }
-
         /* Animations */
         @keyframes float {
             0%, 100% { transform: translateY(0) rotate(0deg); }
@@ -435,19 +522,9 @@
             50% { opacity: 0.7; }
         }
 
-        @keyframes rotate {
-            0% { transform: rotate(0deg); }
-            100% { transform: rotate(360deg); }
-        }
-
         @keyframes shimmer {
             0% { background-position: -200% 0; }
             100% { background-position: 200% 0; }
-        }
-
-        @keyframes glow {
-            0%, 100% { box-shadow: 0 0 10px var(--primary-purple); }
-            50% { box-shadow: 0 0 30px var(--primary-purple); }
         }
 
         /* Responsive Design */
@@ -485,45 +562,6 @@
             }
         }
 
-        @media (max-width: 576px) {
-            .card-3d {
-                height: 130px;
-            }
-            
-            .card-icon {
-                font-size: 2rem;
-            }
-            
-            .player-card {
-                padding: 15px;
-            }
-            
-            .game-section {
-                padding: 15px;
-            }
-            
-            .nav-btn {
-                padding: 6px 10px;
-                font-size: 0.9rem;
-            }
-        }
-
-        @media (max-width: 400px) {
-            .card-3d {
-                height: 110px;
-            }
-            
-            .card-points {
-                font-size: 1.2rem;
-            }
-            
-            .player-avatar {
-                width: 50px;
-                height: 50px;
-                font-size: 1.5rem;
-            }
-        }
-
         /* Game Phase Indicators */
         .phase-indicator {
             background: linear-gradient(45deg, var(--dark-purple), var(--primary-purple));
@@ -534,19 +572,6 @@
             letter-spacing: 1px;
             text-transform: uppercase;
             box-shadow: 0 10px 20px rgba(0, 0, 0, 0.3);
-            position: relative;
-            overflow: hidden;
-        }
-
-        .phase-indicator::after {
-            content: '';
-            position: absolute;
-            top: -50%;
-            left: -50%;
-            width: 200%;
-            height: 200%;
-            background: radial-gradient(circle, rgba(255, 255, 255, 0.1) 0%, transparent 70%);
-            animation: rotate 10s linear infinite;
         }
 
         /* Role Colors */
@@ -554,15 +579,8 @@
         .role-rani { color: #FF69B4; text-shadow: 0 0 10px #FF69B4; }
         .role-thirudan { color: #32CD32; text-shadow: 0 0 10px #32CD32; }
         .role-police { color: #1E90FF; text-shadow: 0 0 10px #1E90FF; }
-        .role-mandhiri { color: #9B30FF; text-shadow: 0 0 10px #9B30FF; }
-        .role-senapathi { color: #FF4500; text-shadow: 0 0 10px #FF4500; }
 
         /* Loading Animation */
-        .loading-dots {
-            display: inline-flex;
-            gap: 5px;
-        }
-
         .loading-dots span {
             width: 8px;
             height: 8px;
@@ -625,22 +643,7 @@
             z-index: 9999;
         }
 
-        /* Achievement Badges */
-        .achievement-badge {
-            width: 60px;
-            height: 60px;
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 1.5rem;
-            background: linear-gradient(45deg, var(--gold), var(--secondary-orange));
-            box-shadow: 0 5px 15px rgba(255, 215, 0, 0.3);
-            margin: 0 auto 10px;
-            animation: var(--float-animation);
-        }
-
-        /* Special Police Badge */
+        /* Special Badges */
         .police-badge {
             position: absolute;
             top: 10px;
@@ -654,7 +657,6 @@
             animation: pulse 1.5s infinite;
         }
 
-        /* Special Host Badge */
         .host-badge {
             position: absolute;
             top: 10px;
@@ -686,9 +688,112 @@
         .online { background-color: #2E8B57; box-shadow: 0 0 10px #2E8B57; }
         .offline { background-color: #DC143C; box-shadow: 0 0 10px #DC143C; }
         .connecting { background-color: #FFA500; box-shadow: 0 0 10px #FFA500; animation: pulse 1s infinite; }
+
+        /* Profile Stats */
+        .stat-card {
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 15px;
+            padding: 20px;
+            text-align: center;
+            margin-bottom: 15px;
+        }
+
+        .stat-value {
+            font-size: 2rem;
+            font-weight: 700;
+            color: var(--gold);
+            margin-bottom: 5px;
+        }
+
+        .stat-label {
+            font-size: 0.9rem;
+            color: rgba(255, 255, 255, 0.7);
+        }
     </style>
 </head>
 <body>
+    <!-- Auth Pages -->
+    <div id="authPage" class="auth-container d-none">
+        <div class="auth-card animate__animated animate__fadeIn">
+            <div class="text-center mb-4">
+                <div class="player-avatar mx-auto mb-3" style="background: linear-gradient(45deg, var(--primary-purple), var(--secondary-orange));">
+                    <i class="fas fa-crown"></i>
+                </div>
+                <h2 class="fw-bold mb-2">RAJA RANI</h2>
+                <p class="text-light">The Ultimate Social Deduction Game</p>
+            </div>
+            
+            <div class="auth-tabs">
+                <button class="auth-tab active" data-tab="login">Login</button>
+                <button class="auth-tab" data-tab="signup">Sign Up</button>
+            </div>
+            
+            <!-- Login Form -->
+            <form id="loginForm" class="auth-form active">
+                <div class="mb-3">
+                    <label class="form-label">Username or Email</label>
+                    <input type="text" class="form-control form-control-lg" id="loginUsername" 
+                           placeholder="Enter username or email" required>
+                </div>
+                <div class="mb-4">
+                    <label class="form-label">Password</label>
+                    <div class="input-group">
+                        <input type="password" class="form-control form-control-lg" id="loginPassword" 
+                               placeholder="Enter password" required>
+                        <button class="btn btn-outline-light" type="button" id="toggleLoginPassword">
+                            <i class="fas fa-eye"></i>
+                        </button>
+                    </div>
+                </div>
+                <div class="mb-3">
+                    <div class="form-check">
+                        <input class="form-check-input" type="checkbox" id="rememberMe">
+                        <label class="form-check-label" for="rememberMe">Remember me</label>
+                    </div>
+                </div>
+                <button type="submit" class="btn btn-neon w-100 mb-3">
+                    <i class="fas fa-sign-in-alt me-2"></i>LOGIN
+                </button>
+                <div class="text-center">
+                    <small class="text-light">Demo: Use "admin" / "admin123" or sign up</small>
+                </div>
+            </form>
+            
+            <!-- Signup Form -->
+            <form id="signupForm" class="auth-form">
+                <div class="mb-3">
+                    <label class="form-label">Username</label>
+                    <input type="text" class="form-control form-control-lg" id="signupUsername" 
+                           placeholder="Choose username" required>
+                </div>
+                <div class="mb-3">
+                    <label class="form-label">Email</label>
+                    <input type="email" class="form-control form-control-lg" id="signupEmail" 
+                           placeholder="Enter email" required>
+                </div>
+                <div class="mb-3">
+                    <label class="form-label">Password</label>
+                    <div class="input-group">
+                        <input type="password" class="form-control form-control-lg" id="signupPassword" 
+                               placeholder="Create password" required minlength="6">
+                        <button class="btn btn-outline-light" type="button" id="toggleSignupPassword">
+                            <i class="fas fa-eye"></i>
+                        </button>
+                    </div>
+                    <div class="form-text">Minimum 6 characters</div>
+                </div>
+                <div class="mb-4">
+                    <label class="form-label">Confirm Password</label>
+                    <input type="password" class="form-control form-control-lg" id="signupConfirmPassword" 
+                           placeholder="Confirm password" required>
+                </div>
+                <button type="submit" class="btn btn-neon w-100">
+                    <i class="fas fa-user-plus me-2"></i>SIGN UP
+                </button>
+            </form>
+        </div>
+    </div>
+
     <!-- Connection Status -->
     <div class="connection-status">
         <div class="d-flex align-items-center bg-dark bg-opacity-75 px-3 py-2 rounded-pill">
@@ -701,7 +806,7 @@
     <div class="particles-container" id="particles"></div>
     
     <!-- Navigation -->
-    <nav class="navbar navbar-expand-lg main-nav fixed-top">
+    <nav class="navbar navbar-expand-lg main-nav fixed-top d-none" id="mainNav">
         <div class="container-fluid">
             <div class="d-flex align-items-center">
                 <button class="btn nav-btn me-2 d-lg-none" id="mobileMenuBtn">
@@ -715,6 +820,56 @@
             <div class="d-flex align-items-center">
                 <div class="game-code-display me-3 d-none d-md-block" id="topGameCode">
                     <i class="fas fa-key me-2"></i><span id="gameCodeDisplay">-----</span>
+                </div>
+                
+                <!-- Profile Dropdown -->
+                <div class="profile-dropdown me-2">
+                    <button class="profile-btn" id="profileBtn">
+                        <i class="fas fa-user"></i>
+                    </button>
+                    <div class="profile-menu" id="profileMenu">
+                        <div class="profile-header">
+                            <div class="profile-avatar" id="profileAvatar">
+                                <i class="fas fa-user"></i>
+                            </div>
+                            <h5 class="fw-bold mb-1" id="profileUsername">Username</h5>
+                            <p class="text-light mb-0" id="profileEmail">email@example.com</p>
+                        </div>
+                        
+                        <div class="row g-2 mb-3">
+                            <div class="col-6">
+                                <div class="stat-card">
+                                    <div class="stat-value" id="profileGames">0</div>
+                                    <div class="stat-label">Games Played</div>
+                                </div>
+                            </div>
+                            <div class="col-6">
+                                <div class="stat-card">
+                                    <div class="stat-value" id="profileWins">0</div>
+                                    <div class="stat-label">Games Won</div>
+                                </div>
+                            </div>
+                            <div class="col-6">
+                                <div class="stat-card">
+                                    <div class="stat-value" id="profilePoints">0</div>
+                                    <div class="stat-label">Total Points</div>
+                                </div>
+                            </div>
+                            <div class="col-6">
+                                <div class="stat-card">
+                                    <div class="stat-value" id="profileRank">#-</div>
+                                    <div class="stat-label">Global Rank</div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <button class="btn btn-neon w-100 mb-2" id="editProfileBtn">
+                            <i class="fas fa-edit me-2"></i>Edit Profile
+                        </button>
+                        <button class="btn nav-btn w-100" id="logoutBtn">
+                            <i class="fas fa-sign-out-alt me-2"></i>Logout
+                        </button>
+                    </div>
                 </div>
                 
                 <div class="btn-group">
@@ -736,7 +891,7 @@
     </nav>
     
     <!-- Mobile Game Code -->
-    <div class="container-fluid d-block d-md-none mt-5 pt-4">
+    <div class="container-fluid d-block d-md-none mt-5 pt-4 d-none" id="mobileGameCodeContainer">
         <div class="d-flex justify-content-center">
             <div class="game-code-display">
                 <i class="fas fa-key me-2"></i><span id="mobileGameCode">-----</span>
@@ -745,16 +900,16 @@
     </div>
 
     <!-- Home Page -->
-    <div id="homePage" class="container-fluid py-5 mt-5">
+    <div id="homePage" class="container-fluid py-5 mt-5 d-none">
         <div class="row justify-content-center">
             <div class="col-12 text-center mb-5">
-                <div class="achievement-badge animate__animated animate__pulse animate__infinite">
+                <div class="player-avatar mx-auto mb-3" style="background: linear-gradient(45deg, var(--primary-purple), var(--secondary-orange));">
                     <i class="fas fa-crown"></i>
                 </div>
-                <h1 class="display-3 fw-bold mb-3 text-gradient">
+                <h1 class="display-3 fw-bold mb-3">
                     <span class="text-warning">RAJA</span> <span class="text-purple">RANI</span>
                 </h1>
-                <p class="lead text-light mb-4">The Ultimate Social Deduction Game</p>
+                <p class="lead text-light mb-4">Welcome, <span id="homeUsername" class="fw-bold text-warning">Player</span>!</p>
                 <div class="phase-indicator animate__animated animate__pulse">
                     <i class="fas fa-gamepad me-2"></i>REAL-TIME MULTIPLAYER • HIDDEN ROLES • STRATEGIC VOTING
                 </div>
@@ -763,7 +918,7 @@
             <div class="col-lg-4 col-md-6 mb-4">
                 <div class="game-section h-100 animate__animated animate__fadeInUp">
                     <div class="text-center mb-4">
-                        <div class="achievement-badge bg-primary">
+                        <div class="player-avatar mx-auto mb-3" style="background: var(--primary-purple);">
                             <i class="fas fa-plus-circle"></i>
                         </div>
                         <h3 class="fw-bold mb-3">Create New Game</h3>
@@ -778,7 +933,7 @@
             <div class="col-lg-4 col-md-6 mb-4">
                 <div class="game-section h-100 animate__animated animate__fadeInUp animate__delay-1s">
                     <div class="text-center mb-4">
-                        <div class="achievement-badge bg-success">
+                        <div class="player-avatar mx-auto mb-3" style="background: var(--success-green);">
                             <i class="fas fa-user-plus"></i>
                         </div>
                         <h3 class="fw-bold mb-3">Join Game</h3>
@@ -793,13 +948,13 @@
             <div class="col-lg-4 col-md-12 mb-4">
                 <div class="game-section h-100 animate__animated animate__fadeInUp animate__delay-2s">
                     <div class="text-center mb-4">
-                        <div class="achievement-badge bg-warning">
+                        <div class="player-avatar mx-auto mb-3" style="background: var(--warning-yellow);">
                             <i class="fas fa-graduation-cap"></i>
                         </div>
-                        <h3 class="fw-bold mb-3">Learn to Play</h3>
-                        <p class="text-light mb-4">Master the strategies and become a Raja Rani champion</p>
-                        <button class="btn btn-neon w-100" id="homeInstructionsBtn">
-                            <i class="fas fa-book-open me-2"></i>GAME GUIDE
+                        <h3 class="fw-bold mb-3">Game History</h3>
+                        <p class="text-light mb-4">View your past games, statistics and achievements</p>
+                        <button class="btn btn-neon w-100" id="viewHistoryBtn">
+                            <i class="fas fa-history me-2"></i>VIEW HISTORY
                         </button>
                     </div>
                 </div>
@@ -1011,10 +1166,10 @@
                 </div>
             </div>
             
-            <!-- Side Panel -->
-            <div class="col-lg-4 col-12">
+            <!-- Side Panel (Scoreboard - Hidden during game, shown only in results) -->
+            <div class="col-lg-4 col-12 d-none" id="scoreboardPanel">
                 <div class="game-section h-100">
-                    <h4 class="fw-bold mb-4"><i class="fas fa-chart-line me-2"></i>Live Scoreboard</h4>
+                    <h4 class="fw-bold mb-4"><i class="fas fa-chart-line me-2"></i>Round Scoreboard</h4>
                     
                     <!-- Score Table -->
                     <div class="scoreboard mb-4">
@@ -1024,7 +1179,7 @@
                                     <tr>
                                         <th>#</th>
                                         <th>Player</th>
-                                        <th>Points</th>
+                                        <th>Score</th>
                                         <th>Role</th>
                                     </tr>
                                 </thead>
@@ -1073,21 +1228,11 @@
                 <div class="modal-body">
                     <form id="joinForm">
                         <div class="mb-3">
-                            <label class="form-label">Your Name</label>
-                            <input type="text" class="form-control form-control-lg" id="playerName" 
-                                   placeholder="Enter your name" required maxlength="20">
-                            <div class="form-text">Choose a unique name for this game</div>
-                        </div>
-                        <div class="mb-4">
                             <label class="form-label">Game Code</label>
                             <input type="text" class="form-control form-control-lg" id="joinCode" 
                                    placeholder="Enter 5-6 character code" required maxlength="6" 
                                    style="letter-spacing: 3px; text-transform: uppercase;">
                             <div class="form-text">Get this code from the game host</div>
-                        </div>
-                        <div class="alert alert-info mb-3">
-                            <i class="fas fa-info-circle me-2"></i>
-                            <strong>Multiplayer Tip:</strong> The host must create the game first, then share the code with other players.
                         </div>
                         <button type="submit" class="btn btn-neon w-100">
                             <i class="fas fa-sign-in-alt me-2"></i>JOIN GAME
@@ -1126,38 +1271,6 @@
                                 </div>
                             </div>
                         </div>
-                        
-                        <div class="accordion-item bg-transparent text-white">
-                            <h2 class="accordion-header">
-                                <button class="accordion-button collapsed bg-dark text-white" type="button" data-bs-toggle="collapse" data-bs-target="#collapseTwo">
-                                    <i class="fas fa-crown me-2"></i>Roles & Points
-                                </button>
-                            </h2>
-                            <div id="collapseTwo" class="accordion-collapse collapse" data-bs-parent="#instructionsAccordion">
-                                <div class="accordion-body">
-                                    <div class="row">
-                                        <div class="col-md-6 mb-3">
-                                            <div class="player-card">
-                                                <div class="player-avatar role-raja mb-2">
-                                                    <i class="fas fa-crown"></i>
-                                                </div>
-                                                <h6>Raja (King)</h6>
-                                                <div class="text-warning fw-bold">1000 points</div>
-                                            </div>
-                                        </div>
-                                        <div class="col-md-6 mb-3">
-                                            <div class="player-card">
-                                                <div class="player-avatar role-rani mb-2">
-                                                    <i class="fas fa-gem"></i>
-                                                </div>
-                                                <h6>Rani (Queen)</h6>
-                                                <div class="text-warning fw-bold">500 points</div>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
                     </div>
                 </div>
             </div>
@@ -1181,10 +1294,259 @@
         </div>
     </div>
     
+    <!-- Game History Modal -->
+    <div class="modal fade" id="historyModal" tabindex="-1">
+        <div class="modal-dialog modal-dialog-centered modal-lg">
+            <div class="modal-content custom-modal">
+                <div class="modal-header">
+                    <h5 class="modal-title fw-bold"><i class="fas fa-history me-2"></i>Game History</h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="table-responsive">
+                        <table class="table table-dark table-hover">
+                            <thead>
+                                <tr>
+                                    <th>Date</th>
+                                    <th>Game Code</th>
+                                    <th>Role</th>
+                                    <th>Score</th>
+                                    <th>Result</th>
+                                </tr>
+                            </thead>
+                            <tbody id="historyTable">
+                                <!-- History will be loaded here -->
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <!-- Bootstrap JS -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"></script>
     
     <script>
+        // User Management System
+        class UserManager {
+            constructor() {
+                this.currentUser = null;
+                this.users = JSON.parse(localStorage.getItem('rajaRaniUsers') || '{}');
+                this.gameHistory = JSON.parse(localStorage.getItem('rajaRaniGameHistory') || '[]');
+                this.userStats = JSON.parse(localStorage.getItem('rajaRaniUserStats') || '{}');
+            }
+
+            // Initialize with demo user
+            initDemoUser() {
+                if (!this.users['admin']) {
+                    this.users['admin'] = {
+                        username: 'admin',
+                        email: 'admin@rajarani.com',
+                        password: 'admin123',
+                        createdAt: new Date().toISOString()
+                    };
+                    this.saveUsers();
+                }
+            }
+
+            saveUsers() {
+                localStorage.setItem('rajaRaniUsers', JSON.stringify(this.users));
+            }
+
+            saveGameHistory() {
+                localStorage.setItem('rajaRaniGameHistory', JSON.stringify(this.gameHistory));
+            }
+
+            saveUserStats() {
+                localStorage.setItem('rajaRaniUserStats', JSON.stringify(this.userStats));
+            }
+
+            // Sign up new user
+            signUp(username, email, password) {
+                if (this.users[username]) {
+                    return { success: false, message: 'Username already exists' };
+                }
+                
+                // Check if email exists
+                for (const user in this.users) {
+                    if (this.users[user].email === email) {
+                        return { success: false, message: 'Email already registered' };
+                    }
+                }
+
+                this.users[username] = {
+                    username,
+                    email,
+                    password,
+                    createdAt: new Date().toISOString()
+                };
+
+                // Initialize user stats
+                this.userStats[username] = {
+                    gamesPlayed: 0,
+                    gamesWon: 0,
+                    totalPoints: 0,
+                    bestScore: 0,
+                    favoriteRole: '',
+                    lastPlayed: null
+                };
+
+                this.saveUsers();
+                this.saveUserStats();
+                return { success: true, message: 'Account created successfully!' };
+            }
+
+            // Login user
+            login(usernameOrEmail, password) {
+                let user = null;
+                
+                // Check by username
+                if (this.users[usernameOrEmail]) {
+                    user = this.users[usernameOrEmail];
+                } else {
+                    // Check by email
+                    for (const username in this.users) {
+                        if (this.users[username].email === usernameOrEmail) {
+                            user = this.users[username];
+                            break;
+                        }
+                    }
+                }
+
+                if (!user) {
+                    return { success: false, message: 'User not found' };
+                }
+
+                if (user.password !== password) {
+                    return { success: false, message: 'Invalid password' };
+                }
+
+                this.currentUser = user;
+                localStorage.setItem('rajaRaniCurrentUser', JSON.stringify(user));
+                return { success: true, message: 'Login successful!', user };
+            }
+
+            // Logout user
+            logout() {
+                this.currentUser = null;
+                localStorage.removeItem('rajaRaniCurrentUser');
+                return { success: true, message: 'Logged out successfully!' };
+            }
+
+            // Get current user
+            getCurrentUser() {
+                if (!this.currentUser) {
+                    const storedUser = localStorage.getItem('rajaRaniCurrentUser');
+                    if (storedUser) {
+                        this.currentUser = JSON.parse(storedUser);
+                    }
+                }
+                return this.currentUser;
+            }
+
+            // Update user stats after game
+            updateUserStats(gameResult) {
+                if (!this.currentUser) return;
+
+                const username = this.currentUser.username;
+                if (!this.userStats[username]) {
+                    this.userStats[username] = {
+                        gamesPlayed: 0,
+                        gamesWon: 0,
+                        totalPoints: 0,
+                        bestScore: 0,
+                        favoriteRole: '',
+                        lastPlayed: null
+                    };
+                }
+
+                const stats = this.userStats[username];
+                stats.gamesPlayed++;
+                stats.totalPoints += gameResult.points || 0;
+                stats.lastPlayed = new Date().toISOString();
+
+                if (gameResult.won) stats.gamesWon++;
+                if (gameResult.points > stats.bestScore) stats.bestScore = gameResult.points;
+
+                // Track favorite role
+                if (gameResult.role) {
+                    // Simple role tracking - can be enhanced
+                    stats.favoriteRole = gameResult.role;
+                }
+
+                this.saveUserStats();
+            }
+
+            // Add game to history
+            addGameHistory(gameData) {
+                const historyEntry = {
+                    id: Date.now(),
+                    date: new Date().toISOString(),
+                    gameCode: gameData.code,
+                    players: gameData.players?.length || 0,
+                    role: gameData.role,
+                    points: gameData.points || 0,
+                    won: gameData.won || false
+                };
+
+                this.gameHistory.unshift(historyEntry);
+                // Keep only last 50 games
+                if (this.gameHistory.length > 50) {
+                    this.gameHistory = this.gameHistory.slice(0, 50);
+                }
+
+                this.saveGameHistory();
+            }
+
+            // Get user's game history
+            getUserHistory() {
+                if (!this.currentUser) return [];
+                return this.gameHistory.filter(game => 
+                    game.players && game.players.some(p => p.username === this.currentUser.username)
+                );
+            }
+
+            // Get user rank
+            getUserRank() {
+                if (!this.currentUser) return null;
+
+                const allStats = Object.entries(this.userStats);
+                const sortedStats = allStats.sort((a, b) => b[1].totalPoints - a[1].totalPoints);
+                
+                const rank = sortedStats.findIndex(stat => stat[0] === this.currentUser.username) + 1;
+                return rank > 0 ? rank : null;
+            }
+
+            // Get user profile
+            getUserProfile() {
+                if (!this.currentUser) return null;
+
+                const username = this.currentUser.username;
+                const stats = this.userStats[username] || {
+                    gamesPlayed: 0,
+                    gamesWon: 0,
+                    totalPoints: 0,
+                    bestScore: 0,
+                    favoriteRole: 'None',
+                    lastPlayed: null
+                };
+
+                const rank = this.getUserRank();
+
+                return {
+                    ...this.currentUser,
+                    stats,
+                    rank,
+                    winRate: stats.gamesPlayed > 0 ? ((stats.gamesWon / stats.gamesPlayed) * 100).toFixed(1) : 0
+                };
+            }
+        }
+
+        // Initialize User Manager
+        const userManager = new UserManager();
+        userManager.initDemoUser();
+
         // Game state
         const gameState = {
             code: null,
@@ -1199,7 +1561,8 @@
             policeId: null,
             timestamp: Date.now(),
             hostId: null,
-            lastSync: Date.now()
+            lastSync: Date.now(),
+            showScoreboard: false // Control scoreboard visibility
         };
 
         let currentPlayerId = null;
@@ -1207,10 +1570,9 @@
         let isHost = false;
         let gamePollInterval = null;
 
-        // JSONBin.io Configuration - REPLACE WITH YOUR OWN API KEY
-        // Get free API key from: https://jsonbin.io/
-        const JSONBIN_API_KEY = '$2a$10$TUNbDNGPL0F2.v8.BHIDQOdCoFxyNYiJz6DgXx9TDmq2M7ur4Ow.i'; // Replace with your actual key
-        const JSONBIN_BIN_ID = '6979de2d43b1c97be9516254'; // This will be created automatically
+        // JSONBin.io Configuration
+        const JSONBIN_API_KEY = '$2a$10$TUNbDNGPL0F2.v8.BHIDQOdCoFxyNYiJz6DgXx9TDmq2M7ur4Ow.i';
+        const JSONBIN_BIN_ID = '6979de2d43b1c97be9516254';
         const JSONBIN_URL = 'https://api.jsonbin.io/v3/b';
 
         // Role definitions
@@ -1218,17 +1580,7 @@
             { name: "Raja", points: 1000, icon: "fas fa-crown", color: "#FFD700", description: "The King - Supreme ruler with highest authority" },
             { name: "Rani", points: 500, icon: "fas fa-gem", color: "#FF69B4", description: "The Queen - Royal majesty and power" },
             { name: "Thirudan", points: 0, icon: "fas fa-user-secret", color: "#32CD32", description: "The Thief - Master of stealth and deception" },
-            { name: "Police", points: 100, icon: "fas fa-shield-alt", color: "#1E90FF", description: "The Police - Protector and investigator" },
-            { name: "Mandhiri", points: 900, icon: "fas fa-landmark", color: "#9B30FF", description: "The Minister - Advisor to the throne" },
-            { name: "Senapathi", points: 860, icon: "fas fa-helmet-battle", color: "#FF4500", description: "The Commander - Leader of the army" },
-            { name: "Thalapathi", points: 825, icon: "fas fa-sword", color: "#FF6347", description: "The General - Military strategist" },
-            { name: "Amaichar", points: 780, icon: "fas fa-book-reader", color: "#00CED1", description: "The Advisor - Wise counselor" },
-            { name: "Palkarar", points: 735, icon: "fas fa-user-shield", color: "#32CD32", description: "The Guard - Protector of the realm" },
-            { name: "Bandhari", points: 700, icon: "fas fa-coins", color: "#FFD700", description: "The Treasurer - Keeper of wealth" },
-            { name: "Kavalar", points: 645, icon: "fas fa-fort-awesome", color: "#8B4513", description: "The Protector - Guardian of the fort" },
-            { name: "Otturar", points: 590, icon: "fas fa-horse-head", color: "#A0522D", description: "The Messenger - Swift communicator" },
-            { name: "Dhapalkarar", points: 450, icon: "fas fa-door-closed", color: "#4169E1", description: "The Gatekeeper - Controller of entry" },
-            { name: "Dharmakartha", points: 240, icon: "fas fa-balance-scale", color: "#20B2AA", description: "The Judge - Arbiter of justice" }
+            { name: "Police", points: 100, icon: "fas fa-shield-alt", color: "#1E90FF", description: "The Police - Protector and investigator" }
         ];
 
         const coreRoles = ["Raja", "Rani", "Thirudan", "Police"];
@@ -1271,44 +1623,61 @@
             }
         }
 
-        // Initialize game
-        function initGame() {
+        // Initialize application
+        function initApp() {
             initParticles();
+            
+            // Check if user is logged in
+            const currentUser = userManager.getCurrentUser();
+            if (currentUser) {
+                showHomePage();
+                loadUserProfile();
+            } else {
+                showAuthPage();
+            }
             
             // Check for existing game in URL
             const urlParams = new URLSearchParams(window.location.search);
             const gameCodeFromURL = urlParams.get('code');
-            const playerNameFromURL = urlParams.get('name');
             
             if (gameCodeFromURL) {
-                // Auto-join if URL has game code
-                if (playerNameFromURL) {
+                // Check for existing game session
+                const savedGameCode = localStorage.getItem('rajaRaniGameCode');
+                const savedPlayerId = localStorage.getItem('rajaRaniPlayerId');
+                
+                if (savedGameCode === gameCodeFromURL && savedPlayerId) {
+                    // Restore game session
                     setTimeout(() => {
-                        document.getElementById('joinCode').value = gameCodeFromURL;
-                        document.getElementById('playerName').value = playerNameFromURL;
-                        joinGame(playerNameFromURL, gameCodeFromURL);
-                    }, 1000);
-                } else {
-                    // Show join modal with code pre-filled
-                    setTimeout(() => {
-                        const modal = new bootstrap.Modal(document.getElementById('joinModal'));
-                        document.getElementById('joinCode').value = gameCodeFromURL;
-                        document.getElementById('playerName').value = `Player${Math.floor(Math.random() * 1000) + 1}`;
-                        modal.show();
+                        restoreGameSession(gameCodeFromURL, savedPlayerId);
                     }, 1000);
                 }
-            } else {
-                showHomePage();
             }
             
             updateUI();
         }
 
+        // Show auth page
+        function showAuthPage() {
+            document.getElementById('authPage').classList.remove('d-none');
+            document.getElementById('mainNav').classList.add('d-none');
+            document.getElementById('homePage').classList.add('d-none');
+            document.getElementById('gameContainer').classList.add('d-none');
+            document.getElementById('mobileGameCodeContainer').classList.add('d-none');
+        }
+
         // Show home page
         function showHomePage() {
+            document.getElementById('authPage').classList.add('d-none');
+            document.getElementById('mainNav').classList.remove('d-none');
             document.getElementById('homePage').classList.remove('d-none');
             document.getElementById('gameContainer').classList.add('d-none');
-            document.body.style.background = 'linear-gradient(135deg, #0c0c0c 0%, #1a1a2e 50%, #16213e 100%)';
+            document.getElementById('mobileGameCodeContainer').classList.add('d-none');
+            
+            // Update username in home page
+            const user = userManager.getCurrentUser();
+            if (user) {
+                document.getElementById('homeUsername').textContent = user.username;
+            }
             
             // Clear polling
             if (gamePollInterval) {
@@ -1319,12 +1688,41 @@
 
         // Show game page
         function showGamePage() {
+            document.getElementById('authPage').classList.add('d-none');
+            document.getElementById('mainNav').classList.remove('d-none');
             document.getElementById('homePage').classList.add('d-none');
             document.getElementById('gameContainer').classList.remove('d-none');
+            document.getElementById('mobileGameCodeContainer').classList.remove('d-none');
             updateUI();
             
             // Start polling
             startGamePolling();
+        }
+
+        // Restore game session
+        async function restoreGameSession(gameCode, playerId) {
+            try {
+                const loadedGame = await loadGameFromServer(gameCode);
+                
+                if (loadedGame && loadedGame.code === gameCode) {
+                    Object.assign(gameState, loadedGame);
+                    currentPlayerId = playerId;
+                    isHost = localStorage.getItem('rajaRaniIsHost') === 'true';
+                    
+                    // Check if player still exists in game
+                    const playerExists = gameState.players.some(p => p.id === playerId);
+                    
+                    if (playerExists) {
+                        showGamePage();
+                        alert('Welcome back to the game!');
+                    } else {
+                        alert('You are no longer in this game. Returning to home page.');
+                        leaveGame();
+                    }
+                }
+            } catch (error) {
+                console.error('Error restoring game:', error);
+            }
         }
 
         // Generate game code
@@ -1341,7 +1739,7 @@
             return code;
         }
 
-        // Save game to JSONBin.io (Cloud Storage)
+        // Save game to JSONBin.io
         async function saveGameToServer(gameData) {
             try {
                 const gameCode = gameData.code;
@@ -1350,15 +1748,13 @@
                     return false;
                 }
                 
-                // Prepare game state
                 const gameToSave = {
                     ...gameData,
                     lastUpdated: Date.now(),
-                    expiresAt: Date.now() + 7200000 // 2 hours from now
+                    expiresAt: Date.now() + 7200000
                 };
                 
                 try {
-                    // Try to save to JSONBin.io
                     const response = await fetch(`${JSONBIN_URL}/${JSONBIN_BIN_ID}`, {
                         method: 'PUT',
                         headers: {
@@ -1380,7 +1776,6 @@
                     console.log('Cloud save failed, using localStorage:', cloudError);
                 }
                 
-                // Fallback to localStorage
                 const allGames = JSON.parse(localStorage.getItem('rajaRaniAllGames') || '{}');
                 allGames[gameData.code] = {
                     ...gameData,
@@ -1388,7 +1783,6 @@
                 };
                 localStorage.setItem('rajaRaniAllGames', JSON.stringify(allGames));
                 
-                // Also save to sessionStorage for cross-tab
                 sessionStorage.setItem('rajaRaniGameUpdate_' + gameData.code, JSON.stringify(gameData));
                 
                 return true;
@@ -1396,7 +1790,6 @@
             } catch (error) {
                 console.error('Error saving game:', error);
                 
-                // Last resort fallback
                 const allGames = JSON.parse(localStorage.getItem('rajaRaniAllGames') || '{}');
                 allGames[gameData.code] = gameData;
                 localStorage.setItem('rajaRaniAllGames', JSON.stringify(allGames));
@@ -1408,7 +1801,6 @@
         // Load game from server
         async function loadGameFromServer(gameCode) {
             try {
-                // First try JSONBin.io
                 try {
                     const response = await fetch(`${JSONBIN_URL}/${JSONBIN_BIN_ID}/latest`, {
                         headers: {
@@ -1422,14 +1814,12 @@
                         const gameData = games[gameCode];
                         
                         if (gameData) {
-                            // Check if game is expired
                             if (gameData.expiresAt && Date.now() > gameData.expiresAt) {
                                 console.log('Game expired, removing...');
                                 await deleteGameFromServer(gameCode);
                                 return null;
                             }
                             
-                            // Clean up inactive players (not active for 60 seconds)
                             const now = Date.now();
                             if (gameData.players) {
                                 gameData.players = gameData.players.filter(player => {
@@ -1444,12 +1834,10 @@
                     console.log('Cloud load failed, trying localStorage:', cloudError);
                 }
                 
-                // Fallback to localStorage
                 const allGames = JSON.parse(localStorage.getItem('rajaRaniAllGames') || '{}');
                 const gameData = allGames[gameCode];
                 
                 if (gameData) {
-                    // Check if game is expired (older than 2 hours)
                     if (gameData.lastUpdated && Date.now() - gameData.lastUpdated > 7200000) {
                         delete allGames[gameCode];
                         localStorage.setItem('rajaRaniAllGames', JSON.stringify(allGames));
@@ -1463,8 +1851,6 @@
                 
             } catch (error) {
                 console.error('Error loading game:', error);
-                
-                // Final fallback
                 const allGames = JSON.parse(localStorage.getItem('rajaRaniAllGames') || '{}');
                 return allGames[gameCode] || null;
             }
@@ -1473,7 +1859,6 @@
         // Delete game from server
         async function deleteGameFromServer(gameCode) {
             try {
-                // Try to delete from JSONBin.io
                 try {
                     const response = await fetch(`${JSONBIN_URL}/${JSONBIN_BIN_ID}/latest`, {
                         headers: {
@@ -1484,11 +1869,8 @@
                     if (response.ok) {
                         const data = await response.json();
                         const games = data.record || {};
-                        
-                        // Remove the specific game
                         delete games[gameCode];
                         
-                        // Save updated games
                         await fetch(`${JSONBIN_URL}/${JSONBIN_BIN_ID}`, {
                             method: 'PUT',
                             headers: {
@@ -1505,7 +1887,6 @@
                 console.error('Error deleting game from cloud:', error);
             }
             
-            // Also delete from localStorage
             const allGames = JSON.parse(localStorage.getItem('rajaRaniAllGames') || '{}');
             delete allGames[gameCode];
             localStorage.setItem('rajaRaniAllGames', JSON.stringify(allGames));
@@ -1513,20 +1894,27 @@
 
         // Create new game
         async function createNewGame(code) {
+            const user = userManager.getCurrentUser();
+            if (!user) {
+                alert('Please login first!');
+                showAuthPage();
+                return;
+            }
+            
             gameState.code = code.toUpperCase();
             currentPlayerId = 'player_' + Date.now() + '_' + Math.random().toString(36).substr(2, 9);
             isHost = true;
             gameState.hostId = currentPlayerId;
             
-            // Initialize game state
             gameState.players = [{
                 id: currentPlayerId,
-                name: 'Host',
+                name: user.username,
                 role: null,
                 points: 0,
                 isHost: true,
                 joinedAt: Date.now(),
-                lastActive: Date.now()
+                lastActive: Date.now(),
+                userId: user.username
             }];
             
             gameState.cards = [];
@@ -1539,33 +1927,24 @@
             gameState.policeId = null;
             gameState.timestamp = Date.now();
             gameState.lastSync = Date.now();
+            gameState.showScoreboard = false;
             
-            // Save to localStorage
             localStorage.setItem('rajaRaniGameCode', gameState.code);
             localStorage.setItem('rajaRaniPlayerId', currentPlayerId);
-            localStorage.setItem('rajaRaniPlayerName', 'Host');
             localStorage.setItem('rajaRaniIsHost', 'true');
             
             try {
-                // Save to cloud
                 await saveGameToServer(gameState);
-                
-                // Start polling
                 startGamePolling();
-                
-                // Update UI
                 updateUI();
                 showGamePage();
-                
                 createConfetti();
                 
-                // Create shareable link
                 const shareLink = `${window.location.origin}${window.location.pathname}?code=${gameState.code}`;
-                const shareText = `🎮 Join my Raja Rani game!\n\nGame Code: ${gameState.code}\n\nJoin Link: ${shareLink}\n\nOr enter code manually in the game.`;
+                const shareText = `🎮 Join my Raja Rani game!\n\nGame Code: ${gameState.code}\n\nJoin Link: ${shareLink}`;
                 
-                alert(`🎮 New game created!\n\nGame Code: ${gameState.code}\n\nShare this code with your friends!\n\nOr share this link:\n${shareLink}`);
+                alert(`🎮 New game created!\n\nGame Code: ${gameState.code}\n\nShare this code with your friends!`);
                 
-                // Copy to clipboard if possible
                 if (navigator.clipboard) {
                     navigator.clipboard.writeText(shareText).then(() => {
                         console.log('Game info copied to clipboard');
@@ -1591,23 +1970,16 @@
                 }
                 
                 try {
-                    // Load latest game state
                     const loadedGame = await loadGameFromServer(gameState.code);
                     
                     if (loadedGame && loadedGame.code === gameState.code) {
-                        // Preserve current player's data
                         const currentPlayer = gameState.players.find(p => p.id === currentPlayerId);
-                        
-                        // Update game state but keep current player
-                        const oldPlayers = gameState.players;
                         Object.assign(gameState, loadedGame);
                         
-                        // Ensure current player is in the list
                         if (currentPlayer && !gameState.players.some(p => p.id === currentPlayerId)) {
                             gameState.players.push(currentPlayer);
                         }
                         
-                        // Update current player's last active time
                         if (currentPlayer) {
                             const playerIndex = gameState.players.findIndex(p => p.id === currentPlayerId);
                             if (playerIndex !== -1) {
@@ -1615,30 +1987,21 @@
                             }
                         }
                         
-                        // Sync back to server
                         await saveGameToServer(gameState);
-                        
-                        // Update UI if something changed
                         updateUI();
                     } else if (!loadedGame) {
-                        // Game not found on server
                         if (isHost) {
-                            // Host should recreate if game disappeared
                             await saveGameToServer(gameState);
-                        } else {
-                            // Player should check connection
-                            console.log('Game not found on server, trying to reconnect...');
                         }
                     }
                     
-                    // Update connection status
                     updateConnectionStatus(true);
                     
                 } catch (error) {
                     console.error('Error polling game:', error);
                     updateConnectionStatus(false);
                 }
-            }, 3000); // Poll every 3 seconds
+            }, 3000);
         }
 
         // Update connection status
@@ -1657,7 +2020,6 @@
 
         // Update UI
         function updateUI() {
-            // Update game code displays
             const gameCodeEl = document.getElementById('gameCode');
             const topGameCodeEl = document.getElementById('gameCodeDisplay');
             const mobileGameCodeEl = document.getElementById('mobileGameCode');
@@ -1672,36 +2034,31 @@
                 mobileGameCodeEl.textContent = '-----';
             }
             
-            // Update player count
             document.getElementById('playerCount').textContent = gameState.players.length;
             document.getElementById('infoPlayerCount').textContent = `${gameState.players.length}/15`;
             document.getElementById('infoRound').textContent = gameState.round;
             
-            // Update game phase
             updateGamePhase();
-            
-            // Render player list
             renderPlayerList();
             
-            // Render cards if in card selection phase
             if (gameState.gamePhase === 'cardSelection') {
                 renderCards();
             }
             
-            // Render voting if in voting phase
             if (gameState.gamePhase === 'voting') {
                 renderVoting();
             }
             
-            // Render results if in results phase
             if (gameState.gamePhase === 'results') {
                 renderResults();
+                // Show scoreboard only in results phase
+                document.getElementById('scoreboardPanel').classList.remove('d-none');
+                renderScoreboard();
+            } else {
+                // Hide scoreboard during game
+                document.getElementById('scoreboardPanel').classList.add('d-none');
             }
             
-            // Render scoreboard
-            renderScoreboard();
-            
-            // Update button states
             updateButtonStates();
         }
 
@@ -1756,7 +2113,7 @@
             }
         }
 
-        // Render player list
+        // Render player list - Hide roles and scores during game
         function renderPlayerList() {
             const playersList = document.getElementById('playersList');
             playersList.innerHTML = '';
@@ -1765,33 +2122,27 @@
                 const col = document.createElement('div');
                 col.className = 'col-6 col-md-4 col-lg-3';
                 
-                const roleDef = player.role ? roleDefinitions.find(r => r.name === player.role) : null;
-                const roleColor = roleDef ? roleDef.color : '#666';
-                const roleIcon = roleDef ? roleDef.icon : 'fas fa-user';
-                
-                // Check if current player is Police
-                const isPolice = player.role === 'Police';
                 const isCurrentPlayer = player.id === currentPlayerId;
                 const isHostPlayer = player.isHost || player.id === gameState.hostId;
+                const showDetails = gameState.gamePhase === 'results' || gameState.gamePhase === 'ended';
                 
                 col.innerHTML = `
                     <div class="player-card text-center animate__animated animate__fadeInUp" style="animation-delay: ${index * 0.1}s">
-                        ${isPolice ? '<div class="police-badge"><i class="fas fa-shield-alt me-1"></i>POLICE</div>' : ''}
+                        ${player.role === 'Police' && showDetails ? '<div class="police-badge"><i class="fas fa-shield-alt me-1"></i>POLICE</div>' : ''}
                         ${isHostPlayer ? '<div class="host-badge"><i class="fas fa-crown me-1"></i>HOST</div>' : ''}
                         
-                        <div class="player-avatar mb-3" style="border-color: ${roleColor}">
-                            <i class="${roleIcon}"></i>
+                        <div class="player-avatar mb-3">
+                            <i class="fas fa-user"></i>
                         </div>
                         <h6 class="fw-bold mb-1">${player.name} ${isCurrentPlayer ? '<span class="badge bg-info ms-1">You</span>' : ''}</h6>
-                        <div class="player-points text-warning mb-2">${gameState.gamePhase === 'results' || gameState.gamePhase === 'ended' ? player.points : '?'}</div>
-                        <div class="player-role">${gameState.gamePhase === 'results' || gameState.gamePhase === 'ended' ? (player.role || 'Hidden') : 'Hidden'}</div>
+                        <div class="player-points text-warning mb-2">${showDetails ? player.points : '?'}</div>
+                        <div class="player-role">${showDetails ? (player.role || 'Hidden') : '?'}</div>
                     </div>
                 `;
                 
                 playersList.appendChild(col);
             });
             
-            // Add empty slots
             for (let i = gameState.players.length; i < 15; i++) {
                 const col = document.createElement('div');
                 col.className = 'col-6 col-md-4 col-lg-3';
@@ -1832,13 +2183,12 @@
                 let cardHTML = '';
                 
                 if (isCurrentPlayerCard) {
-                    // Show revealed card for current player
                     const roleDef = roleDefinitions.find(r => r.name === cardData.role);
                     cardHTML = `
                         <div class="card-3d flipped">
                             <div class="card-face card-back">
                                 <i class="fas fa-question card-icon"></i>
-                                <div>Tap to reveal</div>
+                                <div>Your Card</div>
                             </div>
                             <div class="card-face card-front" style="border-color: ${roleDef.color}">
                                 <i class="${roleDef.icon} card-icon" style="color: ${roleDef.color}"></i>
@@ -1849,7 +2199,6 @@
                         </div>
                     `;
                 } else if (isTaken && hasCurrentPlayerCard) {
-                    // Show locked card if current player already has a card
                     cardHTML = `
                         <div class="card-3d locked" style="opacity: 0.7">
                             <div class="card-face card-back">
@@ -1860,12 +2209,11 @@
                                 <i class="fas fa-user-secret card-icon"></i>
                                 <div class="fw-bold mb-2">Taken</div>
                                 <div class="card-points">???</div>
-                                <small class="text-light">Another player</small>
+                                <small class="text-light">Hidden</small>
                             </div>
                         </div>
                     `;
                 } else if (!isTaken && !hasCurrentPlayerCard) {
-                    // Show available card
                     cardHTML = `
                         <div class="card-3d" onclick="selectCard(${index})">
                             <div class="card-face card-back">
@@ -1881,7 +2229,6 @@
                         </div>
                     `;
                 } else {
-                    // Show empty card
                     cardHTML = `
                         <div class="card-3d" style="opacity: 0.5">
                             <div class="card-face card-back">
@@ -1949,14 +2296,12 @@
             });
         }
 
-        // Render results
+        // Render results - Show all details
         function renderResults() {
             const resultsGrid = document.getElementById('roundResultsGrid');
             resultsGrid.innerHTML = '';
             
-            const sortedPlayers = [...gameState.players].sort((a, b) => b.points - a.points);
-            
-            sortedPlayers.forEach((player, index) => {
+            gameState.players.forEach((player, index) => {
                 const roleDef = player.role ? roleDefinitions.find(r => r.name === player.role) : null;
                 const roleColor = roleDef ? roleDef.color : '#666';
                 const roleIcon = roleDef ? roleDef.icon : 'fas fa-user';
@@ -1965,7 +2310,7 @@
                 col.className = 'col-6 col-md-4 col-lg-3 mb-4';
                 
                 col.innerHTML = `
-                    <div class="player-card text-center ${index < 3 ? 'border-warning border-3' : ''}">
+                    <div class="player-card text-center">
                         <div class="player-avatar mb-3" style="border-color: ${roleColor}">
                             <i class="${roleIcon}"></i>
                         </div>
@@ -2000,7 +2345,7 @@
                             ${index + 1}
                         </div>
                     </td>
-                    <td class="fw-bold">${player.name} ${player.isHost || player.id === gameState.hostId ? '<i class="fas fa-crown text-warning ms-1"></i>' : ''} ${player.role === 'Police' ? '<i class="fas fa-shield-alt text-info ms-1"></i>' : ''}</td>
+                    <td class="fw-bold">${player.name} ${player.isHost || player.id === gameState.hostId ? '<i class="fas fa-crown text-warning ms-1"></i>' : ''}</td>
                     <td class="text-warning fw-bold">${player.points}</td>
                     <td style="color: ${roleColor}">${player.role || '-'}</td>
                 `;
@@ -2016,20 +2361,17 @@
             const currentPlayer = gameState.players.find(p => p.id === currentPlayerId);
             if (!currentPlayer) return;
             
-            // Check if already has card
             const hasCard = gameState.cards.some(c => c && c.playerId === currentPlayerId);
             if (hasCard) {
                 alert('You already selected a card!');
                 return;
             }
             
-            // Check if card is taken
             if (gameState.cards[cardIndex] && gameState.cards[cardIndex].playerId) {
                 alert('This card is already taken!');
                 return;
             }
             
-            // Determine role
             const takenCards = gameState.cards.filter(c => c && c.playerId).length;
             let assignedRole;
             
@@ -2052,14 +2394,12 @@
                 }
             }
             
-            // Assign role
             gameState.cards[cardIndex] = {
                 role: assignedRole.name,
                 points: assignedRole.points,
                 playerId: currentPlayerId
             };
             
-            // Update player
             const playerIndex = gameState.players.findIndex(p => p.id === currentPlayerId);
             gameState.players[playerIndex].role = assignedRole.name;
             gameState.players[playerIndex].points = assignedRole.points;
@@ -2067,14 +2407,11 @@
             if (assignedRole.name === "Thirudan") gameState.thirudanId = currentPlayerId;
             if (assignedRole.name === "Police") gameState.policeId = currentPlayerId;
             
-            // Update timestamp
             gameState.timestamp = Date.now();
             gameState.lastSync = Date.now();
             
-            // Save to server
             await saveGameToServer(gameState);
             
-            // Show role reveal
             showRoleReveal(assignedRole);
             updateUI();
         }
@@ -2144,17 +2481,15 @@
             alert('🎮 Game started! Everyone choose your cards!');
         }
 
-        // Continue to voting - ONLY POLICE CAN CLICK THIS
+        // Continue to voting
         async function continueToVoting() {
             const currentPlayer = gameState.players.find(p => p.id === currentPlayerId);
             
-            // Check if current player is Police
             if (!currentPlayer || currentPlayer.role !== 'Police') {
                 alert('Only Police can continue to voting phase!');
                 return;
             }
             
-            // Check if all players have selected cards
             const playersWithCards = gameState.players.filter(p => p.role !== null).length;
             if (playersWithCards < gameState.players.length) {
                 alert(`Not all players have selected cards yet! ${playersWithCards}/${gameState.players.length} players have cards.`);
@@ -2173,9 +2508,8 @@
             alert('🔍 Voting phase started! Police, find the Thirudan!');
         }
 
-        // Show voting results - ALL PLAYERS CAN CLICK THIS
+        // Show voting results
         async function showVotingResults() {
-            // Check if Police has voted
             if (gameState.policeVote === null) {
                 alert('Police has not voted yet!');
                 return;
@@ -2184,7 +2518,6 @@
             gameState.gamePhase = 'results';
             const policeCorrect = gameState.policeVote === gameState.thirudanId;
             
-            // Update points
             gameState.players.forEach(player => {
                 if (player.id === gameState.policeId) {
                     player.points += policeCorrect ? 100 : 0;
@@ -2193,7 +2526,6 @@
                 }
             });
             
-            // Update result message
             const thirudanPlayer = gameState.players.find(p => p.id === gameState.thirudanId);
             const thirudanName = thirudanPlayer ? thirudanPlayer.name : 'Thirudan';
             const policePlayer = gameState.players.find(p => p.id === gameState.policeId);
@@ -2226,7 +2558,7 @@
             createConfetti();
         }
 
-        // Next round - HOST ONLY
+        // Next round
         async function nextRound() {
             const currentPlayer = gameState.players.find(p => p.id === currentPlayerId);
             if (!currentPlayer || !(currentPlayer.isHost || currentPlayer.id === gameState.hostId)) {
@@ -2256,7 +2588,7 @@
             alert(`🔄 Round ${gameState.round} started! New roles for everyone!`);
         }
 
-        // End game - HOST ONLY
+        // End game
         async function endGame() {
             const currentPlayer = gameState.players.find(p => p.id === currentPlayerId);
             if (!currentPlayer || !(currentPlayer.isHost || currentPlayer.id === gameState.hostId)) {
@@ -2265,18 +2597,37 @@
             }
             
             if (confirm('Are you sure you want to end the game for all players?')) {
-                // Remove game from server
-                await deleteGameFromServer(gameState.code);
+                // Save game history for all players
+                gameState.players.forEach(player => {
+                    if (player.userId) {
+                        userManager.updateUserStats({
+                            won: player.points > 0,
+                            points: player.points,
+                            role: player.role
+                        });
+                        
+                        userManager.addGameHistory({
+                            code: gameState.code,
+                            players: gameState.players,
+                            role: player.role,
+                            points: player.points,
+                            won: player.points > 0
+                        });
+                    }
+                });
                 
+                await deleteGameFromServer(gameState.code);
                 leaveGame();
                 alert('Game ended! Returning to home page.');
             }
         }
 
         // Join game
-        async function joinGame(name, code) {
-            if (!name.trim()) {
-                alert('Please enter your name!');
+        async function joinGame(code) {
+            const user = userManager.getCurrentUser();
+            if (!user) {
+                alert('Please login first!');
+                showAuthPage();
                 return false;
             }
             
@@ -2288,76 +2639,64 @@
             const gameCode = code.toUpperCase();
             
             try {
-                // Check if game exists
                 const gameData = await loadGameFromServer(gameCode);
                 
                 if (!gameData) {
-                    alert('Game not found! Please check the game code.\n\nMake sure:\n1. The host created the game\n2. You entered the code correctly\n3. The game hasn\'t expired');
+                    alert('Game not found! Please check the game code.');
                     return false;
                 }
                 
-                // Set game state
                 gameState.code = gameCode;
                 Object.assign(gameState, gameData);
                 
-                // Check if name already exists
-                const nameExists = gameState.players.some(p => p.name.toLowerCase() === name.toLowerCase());
+                const nameExists = gameState.players.some(p => p.name.toLowerCase() === user.username.toLowerCase());
                 if (nameExists) {
-                    alert(`Name "${name}" is already taken in this game. Please use a different name.`);
+                    alert(`Username "${user.username}" is already taken in this game.`);
                     return false;
                 }
                 
-                // Check if game is full
                 if (gameState.players.length >= 15) {
                     alert('Game is full! Maximum 15 players allowed.');
                     return false;
                 }
                 
-                // Create new player
                 currentPlayerId = 'player_' + Date.now() + '_' + Math.random().toString(36).substr(2, 9);
                 isHost = false;
                 
                 const player = {
                     id: currentPlayerId,
-                    name: name.trim(),
+                    name: user.username,
                     role: null,
                     points: 0,
                     isHost: false,
                     joinedAt: Date.now(),
-                    lastActive: Date.now()
+                    lastActive: Date.now(),
+                    userId: user.username
                 };
                 
                 gameState.players.push(player);
                 
-                // Save player info
                 localStorage.setItem('rajaRaniGameCode', gameState.code);
                 localStorage.setItem('rajaRaniPlayerId', currentPlayerId);
-                localStorage.setItem('rajaRaniPlayerName', name.trim());
                 localStorage.setItem('rajaRaniIsHost', 'false');
                 
-                // Update game on server
                 gameState.timestamp = Date.now();
                 gameState.lastSync = Date.now();
                 await saveGameToServer(gameState);
                 
-                // Start polling
                 startGamePolling();
-                
-                // Update UI and show game page
                 updateUI();
                 showGamePage();
                 
-                alert(`✅ Welcome to the game, ${name}!\n\nGame: ${gameState.code}\nPlayers: ${gameState.players.length}/15\n\nWaiting for host to start...`);
+                alert(`✅ Welcome to the game, ${user.username}!\n\nGame: ${gameState.code}\nPlayers: ${gameState.players.length}/15\n\nWaiting for host to start...`);
                 
                 const modal = bootstrap.Modal.getInstance(document.getElementById('joinModal'));
                 if (modal) {
                     modal.hide();
                 }
                 
-                // Update URL with game code for easy sharing
                 const newUrl = new URL(window.location);
                 newUrl.searchParams.set('code', gameCode);
-                newUrl.searchParams.set('name', name.trim());
                 window.history.replaceState({}, '', newUrl);
                 
                 return true;
@@ -2371,45 +2710,35 @@
 
         // Leave game
         function leaveGame() {
-            // Remove player from game state
             const playerIndex = gameState.players.findIndex(p => p.id === currentPlayerId);
             if (playerIndex !== -1 && gameState.code) {
                 gameState.players.splice(playerIndex, 1);
                 
-                // Update the game state if there are still players
                 if (gameState.players.length > 0) {
                     saveGameToServer(gameState).catch(console.error);
                 } else {
-                    // No players left, clean up game
                     deleteGameFromServer(gameState.code).catch(console.error);
                 }
             }
             
-            // Clear player-specific data
             localStorage.removeItem('rajaRaniGameCode');
             localStorage.removeItem('rajaRaniPlayerId');
-            localStorage.removeItem('rajaRaniPlayerName');
             localStorage.removeItem('rajaRaniIsHost');
             
-            // Clear polling
             if (gamePollInterval) {
                 clearInterval(gamePollInterval);
                 gamePollInterval = null;
             }
             
-            // Reset state
             currentPlayerId = null;
             isHost = false;
             gameState.code = null;
             gameState.players = [];
             
-            // Clear URL parameters
             const newUrl = new URL(window.location);
             newUrl.searchParams.delete('code');
-            newUrl.searchParams.delete('name');
             window.history.replaceState({}, '', newUrl);
             
-            // Show home page
             showHomePage();
         }
 
@@ -2419,7 +2748,6 @@
             const isHostPlayer = currentPlayer && (currentPlayer.isHost || currentPlayer.id === gameState.hostId);
             const isPolice = currentPlayer && currentPlayer.role === 'Police';
             
-            // Start game button - HOST ONLY
             const startGameBtn = document.getElementById('startGameBtn');
             if (isHostPlayer && gameState.players.length >= 4 && gameState.gamePhase === 'waiting') {
                 startGameBtn.disabled = false;
@@ -2432,7 +2760,6 @@
                 startGameBtn.classList.add('btn-secondary');
             }
             
-            // Continue to voting button - POLICE ONLY
             const continueToVotingBtn = document.getElementById('continueToVotingBtn');
             const allCardsSelected = gameState.cards.filter(c => c && c.playerId).length >= gameState.players.length;
             
@@ -2447,7 +2774,6 @@
                     continueToVotingBtn.style.display = 'none';
                 }
                 
-                // Update cards status
                 const cardsSelected = gameState.cards.filter(c => c && c.playerId).length;
                 const cardsStatus = document.getElementById('cardsStatus');
                 if (allCardsSelected) {
@@ -2459,11 +2785,9 @@
                 continueToVotingBtn.style.display = 'none';
             }
             
-            // Submit vote button - POLICE ONLY
             const submitVoteBtn = document.getElementById('submitVoteBtn');
             submitVoteBtn.disabled = !isPolice || gameState.policeVote !== null;
             
-            // Show results button - AVAILABLE TO ALL PLAYERS
             const showResultsBtn = document.getElementById('showResultsBtn');
             const policeVoted = gameState.policeVote !== null;
             
@@ -2480,7 +2804,6 @@
                 }
             }
             
-            // Next round and End game buttons - HOST ONLY
             const nextRoundBtn = document.getElementById('nextRoundBtn');
             const endGameBtn = document.getElementById('endGameBtn');
             
@@ -2501,9 +2824,285 @@
             }
         }
 
+        // Load user profile
+        function loadUserProfile() {
+            const profile = userManager.getUserProfile();
+            if (!profile) return;
+            
+            document.getElementById('profileUsername').textContent = profile.username;
+            document.getElementById('profileEmail').textContent = profile.email;
+            document.getElementById('profileAvatar').innerHTML = `<i class="fas fa-user"></i>`;
+            document.getElementById('profileGames').textContent = profile.stats.gamesPlayed;
+            document.getElementById('profileWins').textContent = profile.stats.gamesWon;
+            document.getElementById('profilePoints').textContent = profile.stats.totalPoints;
+            document.getElementById('profileRank').textContent = profile.rank ? `#${profile.rank}` : '#-';
+        }
+
+        // Show game history
+        function showGameHistory() {
+            const historyTable = document.getElementById('historyTable');
+            historyTable.innerHTML = '';
+            
+            const history = userManager.getUserHistory();
+            
+            if (history.length === 0) {
+                historyTable.innerHTML = `
+                    <tr>
+                        <td colspan="5" class="text-center py-4">
+                            <i class="fas fa-history fs-1 mb-3 d-block text-muted"></i>
+                            <p class="text-light">No game history yet</p>
+                            <button class="btn btn-neon" onclick="createNewGame(generateGameCode())">
+                                Play Your First Game!
+                            </button>
+                        </td>
+                    </tr>
+                `;
+                return;
+            }
+            
+            history.forEach(game => {
+                const row = document.createElement('tr');
+                const date = new Date(game.date);
+                const formattedDate = date.toLocaleDateString();
+                
+                row.innerHTML = `
+                    <td>${formattedDate}</td>
+                    <td>${game.gameCode || 'N/A'}</td>
+                    <td>${game.role || 'Unknown'}</td>
+                    <td class="text-warning fw-bold">${game.points}</td>
+                    <td><span class="badge ${game.won ? 'bg-success' : 'bg-secondary'}">${game.won ? 'Won' : 'Played'}</span></td>
+                `;
+                historyTable.appendChild(row);
+            });
+            
+            const modal = new bootstrap.Modal(document.getElementById('historyModal'));
+            modal.show();
+        }
+
+        // Database Schema (SQL Queries)
+        /*
+
+        -- Users Table
+        CREATE TABLE users (
+            id INT PRIMARY KEY AUTO_INCREMENT,
+            username VARCHAR(50) UNIQUE NOT NULL,
+            email VARCHAR(100) UNIQUE NOT NULL,
+            password_hash VARCHAR(255) NOT NULL,
+            avatar_url VARCHAR(255),
+            created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+            last_login TIMESTAMP NULL,
+            total_points INT DEFAULT 0,
+            games_played INT DEFAULT 0,
+            games_won INT DEFAULT 0,
+            best_score INT DEFAULT 0,
+            favorite_role VARCHAR(50)
+        );
+
+        -- Game Sessions Table
+        CREATE TABLE game_sessions (
+            id INT PRIMARY KEY AUTO_INCREMENT,
+            game_code VARCHAR(10) UNIQUE NOT NULL,
+            host_id INT NOT NULL,
+            max_players INT DEFAULT 15,
+            current_round INT DEFAULT 1,
+            status ENUM('waiting', 'active', 'ended') DEFAULT 'waiting',
+            created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+            ended_at TIMESTAMP NULL,
+            FOREIGN KEY (host_id) REFERENCES users(id)
+        );
+
+        -- Game Players Table
+        CREATE TABLE game_players (
+            id INT PRIMARY KEY AUTO_INCREMENT,
+            game_id INT NOT NULL,
+            user_id INT NOT NULL,
+            role VARCHAR(50),
+            points INT DEFAULT 0,
+            is_host BOOLEAN DEFAULT FALSE,
+            joined_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+            last_active TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+            FOREIGN KEY (game_id) REFERENCES game_sessions(id),
+            FOREIGN KEY (user_id) REFERENCES users(id),
+            UNIQUE KEY unique_game_user (game_id, user_id)
+        );
+
+        -- Game History Table
+        CREATE TABLE game_history (
+            id INT PRIMARY KEY AUTO_INCREMENT,
+            user_id INT NOT NULL,
+            game_id INT NOT NULL,
+            role VARCHAR(50),
+            points_earned INT DEFAULT 0,
+            won BOOLEAN DEFAULT FALSE,
+            played_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+            FOREIGN KEY (user_id) REFERENCES users(id),
+            FOREIGN KEY (game_id) REFERENCES game_sessions(id)
+        );
+
+        -- Cards Table (for each game)
+        CREATE TABLE game_cards (
+            id INT PRIMARY KEY AUTO_INCREMENT,
+            game_id INT NOT NULL,
+            position INT NOT NULL,
+            role_name VARCHAR(50) NOT NULL,
+            points INT NOT NULL,
+            player_id INT NULL,
+            is_revealed BOOLEAN DEFAULT FALSE,
+            FOREIGN KEY (game_id) REFERENCES game_sessions(id),
+            FOREIGN KEY (player_id) REFERENCES game_players(id)
+        );
+
+        -- Votes Table
+        CREATE TABLE game_votes (
+            id INT PRIMARY KEY AUTO_INCREMENT,
+            game_id INT NOT NULL,
+            round INT NOT NULL,
+            voter_id INT NOT NULL,
+            voted_player_id INT NOT NULL,
+            voted_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+            FOREIGN KEY (game_id) REFERENCES game_sessions(id),
+            FOREIGN KEY (voter_id) REFERENCES game_players(id),
+            FOREIGN KEY (voted_player_id) REFERENCES game_players(id)
+        );
+
+        -- Indexes for performance
+        CREATE INDEX idx_users_points ON users(total_points);
+        CREATE INDEX idx_game_sessions_code ON game_sessions(game_code);
+        CREATE INDEX idx_game_players_user ON game_players(user_id);
+        CREATE INDEX idx_game_history_user ON game_history(user_id);
+
+        */
+
         // Event Listeners
         document.addEventListener('DOMContentLoaded', function() {
-            initGame();
+            initApp();
+            
+            // Auth tab switching
+            document.querySelectorAll('.auth-tab').forEach(tab => {
+                tab.addEventListener('click', function() {
+                    const tabName = this.dataset.tab;
+                    
+                    // Update active tab
+                    document.querySelectorAll('.auth-tab').forEach(t => t.classList.remove('active'));
+                    this.classList.add('active');
+                    
+                    // Show active form
+                    document.querySelectorAll('.auth-form').forEach(form => form.classList.remove('active'));
+                    document.getElementById(tabName + 'Form').classList.add('active');
+                });
+            });
+            
+            // Toggle password visibility
+            document.getElementById('toggleLoginPassword').addEventListener('click', function() {
+                const passwordInput = document.getElementById('loginPassword');
+                const icon = this.querySelector('i');
+                
+                if (passwordInput.type === 'password') {
+                    passwordInput.type = 'text';
+                    icon.className = 'fas fa-eye-slash';
+                } else {
+                    passwordInput.type = 'password';
+                    icon.className = 'fas fa-eye';
+                }
+            });
+            
+            document.getElementById('toggleSignupPassword').addEventListener('click', function() {
+                const passwordInput = document.getElementById('signupPassword');
+                const icon = this.querySelector('i');
+                
+                if (passwordInput.type === 'password') {
+                    passwordInput.type = 'text';
+                    icon.className = 'fas fa-eye-slash';
+                } else {
+                    passwordInput.type = 'password';
+                    icon.className = 'fas fa-eye';
+                }
+            });
+            
+            // Login form submission
+            document.getElementById('loginForm').addEventListener('submit', function(e) {
+                e.preventDefault();
+                const usernameOrEmail = document.getElementById('loginUsername').value;
+                const password = document.getElementById('loginPassword').value;
+                
+                const result = userManager.login(usernameOrEmail, password);
+                
+                if (result.success) {
+                    alert(result.message);
+                    loadUserProfile();
+                    showHomePage();
+                } else {
+                    alert(result.message);
+                }
+            });
+            
+            // Signup form submission
+            document.getElementById('signupForm').addEventListener('submit', function(e) {
+                e.preventDefault();
+                const username = document.getElementById('signupUsername').value;
+                const email = document.getElementById('signupEmail').value;
+                const password = document.getElementById('signupPassword').value;
+                const confirmPassword = document.getElementById('signupConfirmPassword').value;
+                
+                if (password !== confirmPassword) {
+                    alert('Passwords do not match!');
+                    return;
+                }
+                
+                if (password.length < 6) {
+                    alert('Password must be at least 6 characters long!');
+                    return;
+                }
+                
+                const result = userManager.signUp(username, email, password);
+                
+                if (result.success) {
+                    alert(result.message);
+                    // Auto login after signup
+                    const loginResult = userManager.login(username, password);
+                    if (loginResult.success) {
+                        loadUserProfile();
+                        showHomePage();
+                    }
+                } else {
+                    alert(result.message);
+                }
+            });
+            
+            // Profile button
+            document.getElementById('profileBtn').addEventListener('click', function(e) {
+                e.stopPropagation();
+                const menu = document.getElementById('profileMenu');
+                menu.classList.toggle('show');
+            });
+            
+            // Close profile menu when clicking outside
+            document.addEventListener('click', function(e) {
+                const profileMenu = document.getElementById('profileMenu');
+                const profileBtn = document.getElementById('profileBtn');
+                
+                if (!profileBtn.contains(e.target) && !profileMenu.contains(e.target)) {
+                    profileMenu.classList.remove('show');
+                }
+            });
+            
+            // Edit profile button
+            document.getElementById('editProfileBtn').addEventListener('click', function() {
+                alert('Profile editing feature coming soon!');
+                document.getElementById('profileMenu').classList.remove('show');
+            });
+            
+            // Logout button
+            document.getElementById('logoutBtn').addEventListener('click', function() {
+                if (confirm('Are you sure you want to logout?')) {
+                    userManager.logout();
+                    alert('Logged out successfully!');
+                    showAuthPage();
+                }
+            });
+            
+            // View history button
+            document.getElementById('viewHistoryBtn').addEventListener('click', showGameHistory);
             
             // Button event listeners
             document.getElementById('createGameBtn').addEventListener('click', generateGameCode);
@@ -2511,21 +3110,17 @@
             document.getElementById('joinExistingGameBtn').addEventListener('click', () => {
                 const modal = new bootstrap.Modal(document.getElementById('joinModal'));
                 document.getElementById('joinCode').value = '';
-                document.getElementById('playerName').value = `Player${Math.floor(Math.random() * 1000) + 1}`;
                 modal.show();
             });
             
             document.getElementById('joinGameBtn').addEventListener('click', () => {
                 const modal = new bootstrap.Modal(document.getElementById('joinModal'));
                 const codeInput = document.getElementById('joinCode');
-                const nameInput = document.getElementById('playerName');
-                
                 codeInput.value = gameState.code || '';
-                nameInput.value = `Player${Math.floor(Math.random() * 1000) + 1}`;
                 modal.show();
             });
             
-            document.getElementById('homeInstructionsBtn').addEventListener('click', () => {
+            document.getElementById('showInstructionsBtn').addEventListener('click', () => {
                 const modal = new bootstrap.Modal(document.getElementById('instructionsModal'));
                 modal.show();
             });
@@ -2537,12 +3132,11 @@
             });
             
             document.getElementById('showScoreboardBtn').addEventListener('click', () => {
-                alert('Scoreboard is already visible on the right side!');
-            });
-            
-            document.getElementById('showInstructionsBtn').addEventListener('click', () => {
-                const modal = new bootstrap.Modal(document.getElementById('instructionsModal'));
-                modal.show();
+                if (gameState.gamePhase === 'results') {
+                    document.getElementById('scoreboardPanel').classList.toggle('d-none');
+                } else {
+                    alert('Scoreboard will be available after the round ends!');
+                }
             });
             
             document.getElementById('startGameBtn').addEventListener('click', startGame);
@@ -2581,38 +3175,24 @@
             // Join form submission
             document.getElementById('joinForm').addEventListener('submit', function(e) {
                 e.preventDefault();
-                const name = document.getElementById('playerName').value.trim();
-                let code = document.getElementById('joinCode').value.trim().toUpperCase();
-                
-                if (!name) {
-                    alert('Please enter your name!');
-                    return;
-                }
+                const code = document.getElementById('joinCode').value.trim().toUpperCase();
                 
                 if (!code || code.length < 5) {
                     alert('Please enter a valid game code (5-6 characters)!');
                     return;
                 }
                 
-                const success = joinGame(name, code);
+                const success = joinGame(code);
                 if (success) {
                     const modal = bootstrap.Modal.getInstance(document.getElementById('joinModal'));
                     modal.hide();
                 }
             });
-            
-            // Auto-fill player name
-            document.getElementById('playerName').value = `Player${Math.floor(Math.random() * 1000) + 1}`;
-            
-            // Service Worker for PWA
-            if ('serviceWorker' in navigator) {
-                window.addEventListener('load', () => {
-                    navigator.serviceWorker.register('/sw.js').catch(error => {
-                        console.log('ServiceWorker registration failed:', error);
-                    });
-                });
-            }
         });
+
+        // Global functions for card selection
+        window.selectCard = selectCard;
+        window.selectVote = selectVote;
     </script>
 </body>
 </html>
