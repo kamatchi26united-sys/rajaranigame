@@ -527,41 +527,6 @@
             100% { background-position: 200% 0; }
         }
 
-        /* Responsive Design */
-        @media (max-width: 768px) {
-            .game-container {
-                padding: 10px;
-            }
-            
-            .card-3d {
-                height: 150px;
-            }
-            
-            .player-avatar {
-                width: 60px;
-                height: 60px;
-                font-size: 1.8rem;
-            }
-            
-            .nav-logo {
-                font-size: 1.5rem;
-            }
-            
-            .game-code-display {
-                font-size: 1rem;
-                letter-spacing: 2px;
-            }
-            
-            .btn-neon {
-                padding: 12px 20px;
-                font-size: 1rem;
-            }
-            
-            .action-center {
-                padding: 20px;
-            }
-        }
-
         /* Game Phase Indicators */
         .phase-indicator {
             background: linear-gradient(45deg, var(--dark-purple), var(--primary-purple));
@@ -709,6 +674,453 @@
             font-size: 0.9rem;
             color: rgba(255, 255, 255, 0.7);
         }
+
+        /* Responsive Design */
+        @media (max-width: 1200px) {
+            .profile-menu {
+                position: fixed;
+                top: 70px;
+                right: 10px;
+                left: 10px;
+                width: auto;
+                max-width: 400px;
+                margin: 0 auto;
+            }
+        }
+
+        @media (max-width: 992px) {
+            .nav-logo {
+                font-size: 1.5rem;
+            }
+            
+            .profile-menu {
+                max-width: 350px;
+            }
+            
+            .stat-card {
+                padding: 15px 10px;
+            }
+            
+            .stat-value {
+                font-size: 1.5rem;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .game-container {
+                padding: 10px;
+            }
+            
+            .card-3d {
+                height: 150px;
+            }
+            
+            .player-avatar {
+                width: 60px;
+                height: 60px;
+                font-size: 1.8rem;
+            }
+            
+            .nav-logo {
+                font-size: 1.3rem;
+            }
+            
+            .game-code-display {
+                font-size: 1rem;
+                letter-spacing: 2px;
+                padding: 4px 10px;
+            }
+            
+            .btn-neon {
+                padding: 12px 20px;
+                font-size: 1rem;
+            }
+            
+            .action-center {
+                padding: 20px;
+            }
+            
+            /* Profile menu mobile adjustments */
+            .profile-dropdown {
+                position: static;
+            }
+            
+            .profile-menu {
+                position: fixed;
+                top: 60px;
+                right: 15px;
+                left: 15px;
+                width: calc(100% - 30px);
+                max-width: none;
+                transform: none;
+                animation: slideInDown 0.3s ease;
+            }
+            
+            .profile-header {
+                padding: 10px;
+            }
+            
+            .profile-avatar {
+                width: 60px;
+                height: 60px;
+                font-size: 1.5rem;
+            }
+            
+            .profile-header h5 {
+                font-size: 1.1rem;
+            }
+            
+            .profile-header p {
+                font-size: 0.9rem;
+            }
+            
+            /* Stats grid for mobile */
+            .stat-card {
+                padding: 12px 8px;
+                margin-bottom: 10px;
+            }
+            
+            .stat-value {
+                font-size: 1.3rem;
+            }
+            
+            .stat-label {
+                font-size: 0.8rem;
+            }
+            
+            /* Hide some nav buttons text on mobile */
+            .nav-btn span.d-none.d-md-inline {
+                display: none !important;
+            }
+            
+            .nav-btn {
+                padding: 6px 10px;
+                font-size: 0.9rem;
+            }
+            
+            /* Adjust game code display on mobile */
+            #topGameCode {
+                display: none !important;
+            }
+            
+            #mobileGameCodeContainer {
+                margin-top: 20px;
+                padding-top: 10px;
+            }
+        }
+
+        @media (max-width: 576px) {
+            .card-3d {
+                height: 130px;
+            }
+            
+            .card-icon {
+                font-size: 2rem;
+            }
+            
+            .player-card {
+                padding: 15px;
+            }
+            
+            .game-section {
+                padding: 15px;
+            }
+            
+            .nav-btn {
+                padding: 5px 8px;
+                font-size: 0.85rem;
+            }
+            
+            .nav-logo {
+                font-size: 1.2rem;
+            }
+            
+            /* Profile button adjustments */
+            .profile-btn {
+                width: 40px;
+                height: 40px;
+                font-size: 1rem;
+            }
+            
+            .profile-menu {
+                top: 55px;
+                right: 10px;
+                left: 10px;
+                width: calc(100% - 20px);
+                padding: 15px;
+            }
+            
+            /* Auth forms on mobile */
+            .auth-card {
+                padding: 25px 20px;
+                margin: 15px;
+            }
+            
+            .auth-tab {
+                padding: 12px;
+                font-size: 0.9rem;
+            }
+            
+            /* Game phase indicators */
+            .phase-indicator {
+                padding: 8px 15px;
+                font-size: 0.8rem;
+            }
+            
+            .phase-indicator span.d-none.d-md-inline {
+                display: inline !important;
+            }
+            
+            /* Game info sections */
+            .action-center {
+                padding: 15px;
+            }
+            
+            .display-1 {
+                font-size: 2.5rem;
+            }
+            
+            .display-6 {
+                font-size: 1.2rem;
+            }
+            
+            /* Home page adjustments */
+            .display-3 {
+                font-size: 2.5rem;
+            }
+            
+            .lead {
+                font-size: 1rem;
+            }
+        }
+
+        @media (max-width: 400px) {
+            .card-3d {
+                height: 110px;
+            }
+            
+            .card-points {
+                font-size: 1.2rem;
+            }
+            
+            .player-avatar {
+                width: 50px;
+                height: 50px;
+                font-size: 1.5rem;
+            }
+            
+            .nav-logo {
+                font-size: 1rem;
+            }
+            
+            .nav-btn {
+                padding: 4px 6px;
+                font-size: 0.8rem;
+                min-width: 40px;
+            }
+            
+            .profile-btn {
+                width: 35px;
+                height: 35px;
+                font-size: 0.9rem;
+            }
+            
+            .profile-menu {
+                top: 50px;
+                padding: 12px;
+            }
+            
+            .profile-avatar {
+                width: 50px;
+                height: 50px;
+                font-size: 1.3rem;
+            }
+            
+            /* Stats grid for very small screens */
+            .row.g-2 {
+                margin-left: -5px;
+                margin-right: -5px;
+            }
+            
+            .row.g-2 > [class*="col-"] {
+                padding-left: 5px;
+                padding-right: 5px;
+            }
+            
+            .stat-card {
+                padding: 10px 5px;
+            }
+            
+            .stat-value {
+                font-size: 1.2rem;
+            }
+            
+            .stat-label {
+                font-size: 0.75rem;
+            }
+            
+            /* Auth forms */
+            .auth-card {
+                padding: 20px 15px;
+            }
+            
+            .form-control-lg {
+                padding: 0.5rem 0.75rem;
+                font-size: 1rem;
+            }
+            
+            /* Game sections */
+            .game-section {
+                padding: 12px;
+            }
+            
+            .btn-neon {
+                padding: 10px 15px;
+                font-size: 0.9rem;
+            }
+            
+            .btn-neon.btn-lg {
+                padding: 12px 20px;
+            }
+        }
+
+        /* Extra small devices (phones in portrait) */
+        @media (max-width: 350px) {
+            .nav-logo {
+                font-size: 0.9rem;
+            }
+            
+            .nav-btn {
+                padding: 3px 5px;
+                font-size: 0.75rem;
+                min-width: 35px;
+            }
+            
+            .profile-btn {
+                width: 32px;
+                height: 32px;
+                font-size: 0.8rem;
+            }
+            
+            .game-code-display {
+                font-size: 0.9rem;
+                padding: 3px 8px;
+            }
+            
+            /* Adjust stats grid to 2 columns */
+            .row.g-2 {
+                margin-left: -3px;
+                margin-right: -3px;
+            }
+            
+            .row.g-2 > [class*="col-"] {
+                padding-left: 3px;
+                padding-right: 3px;
+                flex: 0 0 50%;
+                max-width: 50%;
+            }
+        }
+
+        /* Landscape orientation adjustments */
+        @media (max-height: 600px) and (orientation: landscape) {
+            .profile-menu {
+                max-height: 80vh;
+                overflow-y: auto;
+            }
+            
+            .auth-container {
+                padding: 10px;
+            }
+            
+            .auth-card {
+                max-height: 90vh;
+                overflow-y: auto;
+            }
+        }
+
+        /* Tablet specific adjustments */
+        @media (min-width: 768px) and (max-width: 1024px) {
+            .profile-menu {
+                min-width: 280px;
+            }
+            
+            .stat-card {
+                padding: 15px 10px;
+            }
+            
+            .stat-value {
+                font-size: 1.4rem;
+            }
+        }
+
+        /* Animation for mobile profile menu */
+        @keyframes slideInDown {
+            from {
+                opacity: 0;
+                transform: translateY(-20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        /* Ensure profile menu is above other elements */
+        .profile-menu {
+            z-index: 1050;
+        }
+
+        /* Improve touch targets for mobile */
+        @media (max-width: 768px) {
+            .btn,
+            .nav-btn,
+            .profile-btn,
+            .card-3d {
+                min-height: 44px; /* Apple's recommended minimum touch target size */
+            }
+            
+            input,
+            select,
+            textarea {
+                font-size: 16px; /* Prevents zoom on iOS */
+            }
+            
+            /* Prevent text overflow in profile */
+            .profile-header h5,
+            .profile-header p {
+                white-space: nowrap;
+                overflow: hidden;
+                text-overflow: ellipsis;
+                max-width: 100%;
+            }
+        }
+
+        /* Dark mode adjustments for mobile */
+        @media (max-width: 768px) {
+            .profile-menu {
+                background: rgba(15, 15, 30, 0.98);
+                backdrop-filter: blur(25px);
+                border: 2px solid var(--primary-purple);
+            }
+            
+            /* Improve visibility on small screens */
+            .stat-card {
+                background: rgba(255, 255, 255, 0.08);
+            }
+        }
+
+        /* Accessibility improvements for mobile */
+        @media (max-width: 768px) {
+            .profile-btn:focus {
+                outline: 2px solid var(--secondary-orange);
+                outline-offset: 2px;
+            }
+            
+            .nav-btn:focus {
+                outline: 2px solid var(--primary-purple);
+                outline-offset: 2px;
+            }
+        }
     </style>
 </head>
 <body>
@@ -808,83 +1220,89 @@
     <!-- Navigation -->
     <nav class="navbar navbar-expand-lg main-nav fixed-top d-none" id="mainNav">
         <div class="container-fluid">
-            <div class="d-flex align-items-center">
-                <button class="btn nav-btn me-2 d-lg-none" id="mobileMenuBtn">
+            <div class="d-flex align-items-center w-100">
+                <!-- Mobile menu button -->
+                <button class="btn nav-btn me-2 d-lg-none" id="mobileMenuBtn" type="button">
                     <i class="fas fa-bars"></i>
                 </button>
-                <div class="nav-logo">
+                
+                <!-- Logo -->
+                <div class="nav-logo flex-grow-1 text-center text-lg-start">
                     <i class="fas fa-crown me-2"></i>RAJA RANI
                 </div>
-            </div>
-            
-            <div class="d-flex align-items-center">
-                <div class="game-code-display me-3 d-none d-md-block" id="topGameCode">
+                
+                <!-- Desktop Game Code (hidden on mobile) -->
+                <div class="game-code-display me-3 d-none d-lg-block" id="topGameCode">
                     <i class="fas fa-key me-2"></i><span id="gameCodeDisplay">-----</span>
                 </div>
                 
-                <!-- Profile Dropdown -->
-                <div class="profile-dropdown me-2">
-                    <button class="profile-btn" id="profileBtn">
-                        <i class="fas fa-user"></i>
-                    </button>
-                    <div class="profile-menu" id="profileMenu">
-                        <div class="profile-header">
-                            <div class="profile-avatar" id="profileAvatar">
-                                <i class="fas fa-user"></i>
-                            </div>
-                            <h5 class="fw-bold mb-1" id="profileUsername">Username</h5>
-                            <p class="text-light mb-0" id="profileEmail">email@example.com</p>
-                        </div>
-                        
-                        <div class="row g-2 mb-3">
-                            <div class="col-6">
-                                <div class="stat-card">
-                                    <div class="stat-value" id="profileGames">0</div>
-                                    <div class="stat-label">Games Played</div>
-                                </div>
-                            </div>
-                            <div class="col-6">
-                                <div class="stat-card">
-                                    <div class="stat-value" id="profileWins">0</div>
-                                    <div class="stat-label">Games Won</div>
-                                </div>
-                            </div>
-                            <div class="col-6">
-                                <div class="stat-card">
-                                    <div class="stat-value" id="profilePoints">0</div>
-                                    <div class="stat-label">Total Points</div>
-                                </div>
-                            </div>
-                            <div class="col-6">
-                                <div class="stat-card">
-                                    <div class="stat-value" id="profileRank">#-</div>
-                                    <div class="stat-label">Global Rank</div>
-                                </div>
-                            </div>
-                        </div>
-                        
-                        <button class="btn btn-neon w-100 mb-2" id="editProfileBtn">
-                            <i class="fas fa-edit me-2"></i>Edit Profile
+                <!-- Right side controls -->
+                <div class="d-flex align-items-center">
+                    <!-- Profile Dropdown -->
+                    <div class="profile-dropdown me-2">
+                        <button class="profile-btn" id="profileBtn" type="button" aria-label="Profile">
+                            <i class="fas fa-user"></i>
                         </button>
-                        <button class="btn nav-btn w-100" id="logoutBtn">
-                            <i class="fas fa-sign-out-alt me-2"></i>Logout
+                        <div class="profile-menu" id="profileMenu">
+                            <div class="profile-header">
+                                <div class="profile-avatar" id="profileAvatar">
+                                    <i class="fas fa-user"></i>
+                                </div>
+                                <h5 class="fw-bold mb-1" id="profileUsername">Username</h5>
+                                <p class="text-light mb-0" id="profileEmail">email@example.com</p>
+                            </div>
+                            
+                            <div class="row g-2 mb-3">
+                                <div class="col-6">
+                                    <div class="stat-card">
+                                        <div class="stat-value" id="profileGames">0</div>
+                                        <div class="stat-label">Games Played</div>
+                                    </div>
+                                </div>
+                                <div class="col-6">
+                                    <div class="stat-card">
+                                        <div class="stat-value" id="profileWins">0</div>
+                                        <div class="stat-label">Games Won</div>
+                                    </div>
+                                </div>
+                                <div class="col-6">
+                                    <div class="stat-card">
+                                        <div class="stat-value" id="profilePoints">0</div>
+                                        <div class="stat-label">Total Points</div>
+                                    </div>
+                                </div>
+                                <div class="col-6">
+                                    <div class="stat-card">
+                                        <div class="stat-value" id="profileRank">#-</div>
+                                        <div class="stat-label">Global Rank</div>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <button class="btn btn-neon w-100 mb-2" id="editProfileBtn">
+                                <i class="fas fa-edit me-2"></i>Edit Profile
+                            </button>
+                            <button class="btn nav-btn w-100" id="logoutBtn">
+                                <i class="fas fa-sign-out-alt me-2"></i>Logout
+                            </button>
+                        </div>
+                    </div>
+                    
+                    <!-- Navigation buttons -->
+                    <div class="btn-group">
+                        <button class="btn nav-btn me-2" id="showScoreboardBtn" title="Scoreboard">
+                            <i class="fas fa-trophy"></i>
+                            <span class="d-none d-md-inline"> Score</span>
+                        </button>
+                        <button class="btn nav-btn me-2" id="showInstructionsBtn" title="Instructions">
+                            <i class="fas fa-info-circle"></i>
+                            <span class="d-none d-md-inline"> Help</span>
+                        </button>
+                        <button class="btn nav-btn btn-danger" id="closeGameBtn" title="Exit Game">
+                            <i class="fas fa-sign-out-alt"></i>
+                            <span class="d-none d-md-inline"> Exit</span>
                         </button>
                     </div>
-                </div>
-                
-                <div class="btn-group">
-                    <button class="btn nav-btn me-2" id="showScoreboardBtn" title="Scoreboard">
-                        <i class="fas fa-trophy"></i>
-                        <span class="d-none d-md-inline"> Scoreboard</span>
-                    </button>
-                    <button class="btn nav-btn me-2" id="showInstructionsBtn" title="Instructions">
-                        <i class="fas fa-info-circle"></i>
-                        <span class="d-none d-md-inline"> Help</span>
-                    </button>
-                    <button class="btn nav-btn btn-danger" id="closeGameBtn" title="Exit Game">
-                        <i class="fas fa-sign-out-alt"></i>
-                        <span class="d-none d-md-inline"> Exit</span>
-                    </button>
                 </div>
             </div>
         </div>
@@ -2879,103 +3297,39 @@
             modal.show();
         }
 
-        // Database Schema (SQL Queries)
-        /*
-
-        -- Users Table
-        CREATE TABLE users (
-            id INT PRIMARY KEY AUTO_INCREMENT,
-            username VARCHAR(50) UNIQUE NOT NULL,
-            email VARCHAR(100) UNIQUE NOT NULL,
-            password_hash VARCHAR(255) NOT NULL,
-            avatar_url VARCHAR(255),
-            created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-            last_login TIMESTAMP NULL,
-            total_points INT DEFAULT 0,
-            games_played INT DEFAULT 0,
-            games_won INT DEFAULT 0,
-            best_score INT DEFAULT 0,
-            favorite_role VARCHAR(50)
-        );
-
-        -- Game Sessions Table
-        CREATE TABLE game_sessions (
-            id INT PRIMARY KEY AUTO_INCREMENT,
-            game_code VARCHAR(10) UNIQUE NOT NULL,
-            host_id INT NOT NULL,
-            max_players INT DEFAULT 15,
-            current_round INT DEFAULT 1,
-            status ENUM('waiting', 'active', 'ended') DEFAULT 'waiting',
-            created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-            ended_at TIMESTAMP NULL,
-            FOREIGN KEY (host_id) REFERENCES users(id)
-        );
-
-        -- Game Players Table
-        CREATE TABLE game_players (
-            id INT PRIMARY KEY AUTO_INCREMENT,
-            game_id INT NOT NULL,
-            user_id INT NOT NULL,
-            role VARCHAR(50),
-            points INT DEFAULT 0,
-            is_host BOOLEAN DEFAULT FALSE,
-            joined_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-            last_active TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-            FOREIGN KEY (game_id) REFERENCES game_sessions(id),
-            FOREIGN KEY (user_id) REFERENCES users(id),
-            UNIQUE KEY unique_game_user (game_id, user_id)
-        );
-
-        -- Game History Table
-        CREATE TABLE game_history (
-            id INT PRIMARY KEY AUTO_INCREMENT,
-            user_id INT NOT NULL,
-            game_id INT NOT NULL,
-            role VARCHAR(50),
-            points_earned INT DEFAULT 0,
-            won BOOLEAN DEFAULT FALSE,
-            played_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-            FOREIGN KEY (user_id) REFERENCES users(id),
-            FOREIGN KEY (game_id) REFERENCES game_sessions(id)
-        );
-
-        -- Cards Table (for each game)
-        CREATE TABLE game_cards (
-            id INT PRIMARY KEY AUTO_INCREMENT,
-            game_id INT NOT NULL,
-            position INT NOT NULL,
-            role_name VARCHAR(50) NOT NULL,
-            points INT NOT NULL,
-            player_id INT NULL,
-            is_revealed BOOLEAN DEFAULT FALSE,
-            FOREIGN KEY (game_id) REFERENCES game_sessions(id),
-            FOREIGN KEY (player_id) REFERENCES game_players(id)
-        );
-
-        -- Votes Table
-        CREATE TABLE game_votes (
-            id INT PRIMARY KEY AUTO_INCREMENT,
-            game_id INT NOT NULL,
-            round INT NOT NULL,
-            voter_id INT NOT NULL,
-            voted_player_id INT NOT NULL,
-            voted_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-            FOREIGN KEY (game_id) REFERENCES game_sessions(id),
-            FOREIGN KEY (voter_id) REFERENCES game_players(id),
-            FOREIGN KEY (voted_player_id) REFERENCES game_players(id)
-        );
-
-        -- Indexes for performance
-        CREATE INDEX idx_users_points ON users(total_points);
-        CREATE INDEX idx_game_sessions_code ON game_sessions(game_code);
-        CREATE INDEX idx_game_players_user ON game_players(user_id);
-        CREATE INDEX idx_game_history_user ON game_history(user_id);
-
-        */
+        // Adjust profile menu for mobile
+        function adjustProfileMenuForMobile() {
+            const profileMenu = document.getElementById('profileMenu');
+            const isMobile = window.innerWidth <= 768;
+            
+            if (isMobile) {
+                // On mobile, position the menu below the navbar
+                profileMenu.style.position = 'fixed';
+                profileMenu.style.top = '60px';
+                profileMenu.style.left = '15px';
+                profileMenu.style.right = '15px';
+                profileMenu.style.width = 'auto';
+                profileMenu.style.maxWidth = 'none';
+                profileMenu.style.transform = 'none';
+            } else {
+                // Reset styles for desktop
+                profileMenu.style.position = '';
+                profileMenu.style.top = '';
+                profileMenu.style.left = '';
+                profileMenu.style.right = '';
+                profileMenu.style.width = '';
+                profileMenu.style.maxWidth = '';
+                profileMenu.style.transform = '';
+            }
+        }
 
         // Event Listeners
         document.addEventListener('DOMContentLoaded', function() {
             initApp();
+            
+            // Adjust profile menu on resize
+            window.addEventListener('resize', adjustProfileMenuForMobile);
+            window.addEventListener('load', adjustProfileMenuForMobile);
             
             // Auth tab switching
             document.querySelectorAll('.auth-tab').forEach(tab => {
@@ -3074,6 +3428,7 @@
                 e.stopPropagation();
                 const menu = document.getElementById('profileMenu');
                 menu.classList.toggle('show');
+                adjustProfileMenuForMobile();
             });
             
             // Close profile menu when clicking outside
@@ -3082,6 +3437,20 @@
                 const profileBtn = document.getElementById('profileBtn');
                 
                 if (!profileBtn.contains(e.target) && !profileMenu.contains(e.target)) {
+                    profileMenu.classList.remove('show');
+                }
+            });
+            
+            // Close profile menu when window is resized
+            window.addEventListener('resize', function() {
+                const profileMenu = document.getElementById('profileMenu');
+                profileMenu.classList.remove('show');
+            });
+            
+            // Handle escape key to close profile menu
+            document.addEventListener('keydown', function(e) {
+                if (e.key === 'Escape') {
+                    const profileMenu = document.getElementById('profileMenu');
                     profileMenu.classList.remove('show');
                 }
             });
@@ -3188,6 +3557,10 @@
                     modal.hide();
                 }
             });
+            
+            // Auto-fill demo credentials for quick testing
+            document.getElementById('loginUsername').value = 'admin';
+            document.getElementById('loginPassword').value = 'admin123';
         });
 
         // Global functions for card selection
